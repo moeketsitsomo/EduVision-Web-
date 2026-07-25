@@ -30,6 +30,7 @@ services:
       - .env
     environment:
       PORT: 4000
+      NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-eduvision}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-eduvision}?schema=public
       REDIS_URL: redis://redis:6379
     depends_on:
