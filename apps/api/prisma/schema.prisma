@@ -11,12 +11,30 @@ enum UserRole {
   SUPER_ADMIN
   SCHOOL_ADMIN
   SCHOOL_STAFF
+  TEACHER
+  PARENT
+  LEARNER
 }
 
 enum SubscriptionStatus {
   ACTIVE
   TRIAL
   SUSPENDED
+  CANCELLED
+  EXPIRED
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
   CANCELLED
 }
 
@@ -28,83 +46,166 @@ enum MediaType {
   OTHER
 }
 
-model School {
-  id                String            @id @default(cuid())
-  name              String
-  slug              String            @unique
-  customDomain      String?           @unique
-  logoUrl           String?
-  faviconUrl        String?
-  primaryColor      String?           @default("#2563eb")
-  secondaryColor    String?           @default("#1e293b")
-  darkMode          Boolean           @default(false)
-  contactEmail      String?
-  contactPhone      String?
-  address           String?
-  websiteTitle      String?
-  metaDescription   String?
-  isActive          Boolean           @default(true)
-  subscriptionStatus SubscriptionStatus @default(TRIAL)
-  settings          Json?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+enum NoticeAudience {
+  ALL
+  PARENTS
+  TEACHERS
+  LEARNERS
+  STAFF
+}
 
-  users             User[]
-  auditLogs         AuditLog[]
-  pages             Page[]
-  posts             Post[]
-  staff             Staff[]
-  events            Event[]
-  galleries         Gallery[]
-  downloads         Download[]
-  media             Media[]
-  contacts          EmergencyContact[]
-  socials           SocialLink[]
-  navigationItems   NavigationItem[]
-  fees              SchoolFee[]
-  contactMessages   ContactMessage[]
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum AdmissionStatus {
+  PENDING
+  REVIEWING
+  ACCEPTED
+  REJECTED
+  WAITLISTED
+}
+
+enum PlanType {
+  BASIC
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+}
+
+model School {
+  id                  String             @id @default(cuid())
+  name                String
+  slug                String             @unique
+  customDomain        String?            @unique
+  logoUrl             String?
+  faviconUrl          String?
+  primaryColor        String?            @default("#2563eb")
+  secondaryColor      String?            @default("#1e293b")
+  darkMode            Boolean            @default(false)
+  contactEmail        String?
+  contactPhone        String?
+  address             String?
+  billingEmail        String?
+  websiteTitle        String?
+  metaDescription     String?
+  isActive            Boolean            @default(true)
+  subscriptionStatus  SubscriptionStatus @default(TRIAL)
+  trialEndsAt         DateTime?
+  plan                PlanType?          @default(BASIC)
+  licenseKey          String?            @unique
+  maxStorageMb        Int                @default(100)
+  maxUsers            Int                @default(50)
+  settings            Json?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  users               User[]
+  auditLogs           AuditLog[]
+  pages               Page[]
+  posts               Post[]
+  staff               Staff[]
+  events              Event[]
+  galleries           Gallery[]
+  downloads           Download[]
+  media               Media[]
+  contacts            EmergencyContact[]
+  socials             SocialLink[]
+  navigationItems     NavigationItem[]
+  fees                SchoolFee[]
+  contactMessages     ContactMessage[]
+  notices             Notice[]
+  admissions          AdmissionApplication[]
+  results             Result[]
+  attendance          Attendance[]
+  subscriptions       Subscription[]
+  invoices            Invoice[]
+  licenses            License[]
+  students            Student[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([slug])
   @@index([customDomain])
   @@index([isActive])
+  @@index([subscriptionStatus])
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String
-  passwordHash String
-  firstName    String?
-  lastName     String?
-  role         UserRole
-  isActive     Boolean  @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  email               String
+  passwordHash        String
+  firstName           String?
+  lastName            String?
+  role                UserRole
+  isActive            Boolean   @default(true)
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  schoolId     String
-  school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean   @default(false)
+  twoFactorBackupCodes Json?
 
-  auditLogs    AuditLog[]
-  media        Media[]
+  schoolId            String
+  school              School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  studentId           String?
+  student             Student?  @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  auditLogs           AuditLog[]
+  media               Media[]
 
   @@unique([email, schoolId])
   @@index([schoolId])
+  @@index([studentId])
+}
+
+model Student {
+  id           String       @id @default(cuid())
+  schoolId     String
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentNumber String      @unique
+  firstName    String
+  lastName     String?
+  grade        String?
+  dateOfBirth  DateTime?
+  parentEmail  String?
+  parentPhone  String?
+  gender       String?
+  address      String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  users        User[]
+  results      Result[]
+  attendance   Attendance[]
+
+  @@unique([schoolId, studentNumber])
+  @@index([schoolId])
+  @@index([parentEmail])
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  action    String
-  entity    String
-  entityId  String?
-  metadata  Json?
-  userId    String?
-  schoolId  String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  action      String
+  entity      String
+  entityId    String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  userId      String?
+  schoolId    String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  school      School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
 
   @@index([schoolId, createdAt])
   @@index([userId])
+  @@index([action, createdAt])
 }
 
 model Page {
@@ -177,7 +278,7 @@ model Event {
   allDay      Boolean  @default(false)
   location    String?
   imageUrl    String?
-  category    String?
+  category    String?  @default("general")
   isPublished Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -253,6 +354,7 @@ model Media {
   downloads     Download[]
 
   @@index([schoolId, type])
+  @@index([uploadedById])
 }
 
 model EmergencyContact {
@@ -324,4 +426,153 @@ model ContactMessage {
   school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   @@index([schoolId, createdAt])
+}
+
+model Notice {
+  id          String        @id @default(cuid())
+  schoolId    String
+  school      School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  title       String
+  content     String        @default("")
+  audience    NoticeAudience @default(ALL)
+  isPublished Boolean       @default(true)
+  publishedAt DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([schoolId, audience, publishedAt])
+  @@index([schoolId, isPublished, publishedAt])
+}
+
+model AdmissionApplication {
+  id              String         @id @default(cuid())
+  schoolId        String
+  school          School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentFirstName String
+  studentLastName String?
+  dateOfBirth     DateTime?
+  gender          String?
+  gradeApplying   String
+  previousSchool  String?
+  parentName      String
+  parentEmail     String
+  parentPhone     String?
+  address         String?
+  status          AdmissionStatus @default(PENDING)
+  notes           String?
+  documentUrls    Json?
+  submittedAt     DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([schoolId, status, submittedAt])
+}
+
+model Result {
+  id            String   @id @default(cuid())
+  schoolId      String
+  school        School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentId     String?
+  student       Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  studentNumber String?
+  academicYear  String
+  term          String
+  subject       String
+  score         Float?
+  maxScore      Float    @default(100)
+  grade         String?
+  remarks       String?
+  isPublished   Boolean  @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([schoolId, studentNumber, academicYear, term])
+  @@index([schoolId, studentId, academicYear, term])
+}
+
+model Attendance {
+  id            String           @id @default(cuid())
+  schoolId      String
+  school        School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentId     String?
+  student       Student?         @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  studentNumber String?
+  studentName   String?
+  grade         String?
+  date          DateTime         @db.Date
+  status        AttendanceStatus
+  reason        String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([schoolId, date, status])
+  @@index([schoolId, studentNumber, date])
+}
+
+model Subscription {
+  id            String             @id @default(cuid())
+  schoolId      String             @unique
+  school        School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  plan          PlanType           @default(BASIC)
+  status        SubscriptionStatus @default(TRIAL)
+  startDate     DateTime?
+  endDate       DateTime?
+  trialEndsAt   DateTime?
+  price         Decimal?
+  billingCycle  BillingCycle?
+  autoRenew     Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  invoices      Invoice[]
+
+  @@index([schoolId, status])
+  @@index([status, endDate])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  schoolId       String
+  school         School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  amount         Decimal
+  tax            Decimal       @default(0)
+  total          Decimal
+  dueDate        DateTime?
+  paidAt         DateTime?
+  status         InvoiceStatus @default(DRAFT)
+  items          Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([schoolId, status, dueDate])
+  @@index([schoolId, paidAt])
+}
+
+model License {
+  id        String             @id @default(cuid())
+  schoolId  String             @unique
+  school    School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  key       String             @unique
+  seats     Int                @default(0)
+  startDate DateTime?
+  endDate   DateTime?
+  status    SubscriptionStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  email     String
+  tokenHash String
+  schoolId  String?
+  school    School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email, schoolId])
+  @@index([expiresAt])
 }
