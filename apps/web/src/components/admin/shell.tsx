@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { getToken } from '@/lib/admin-api';
 import { RESOURCES } from './resource-config';
-import { LogOut, Menu, LayoutDashboard, type LucideIcon } from 'lucide-react';
+import { LogOut, Menu, LayoutDashboard, Shield, type LucideIcon } from 'lucide-react';
 import {
   FileText,
   Newspaper,
@@ -41,10 +42,26 @@ interface NavItem {
   icon: LucideIcon;
 }
 
+function getRoleFromToken(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1])) as { role?: string };
+    return payload.role || null;
+  } catch {
+    return null;
+  }
+}
+
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRole(getRoleFromToken());
+  }, []);
 
   const navItems: NavItem[] = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -53,6 +70,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       label: config.title,
       icon: RESOURCE_ICONS[key] || FileText,
     })),
+    ...(role === 'SUPER_ADMIN' ? [{ href: '/admin/super', label: 'Super Admin', icon: Shield }] : []),
   ];
 
   const handleLogout = () => {
