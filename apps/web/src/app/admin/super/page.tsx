@@ -54,6 +54,10 @@ const emptySchool = {
   contactEmail: '',
   contactPhone: '',
   address: '',
+  adminEmail: '',
+  adminPassword: '',
+  adminFirstName: '',
+  adminLastName: '',
 };
 
 export default function SuperAdminPage() {
@@ -288,6 +292,44 @@ export default function SuperAdminPage() {
                   id="address"
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-2 pt-4">
+                <h3 className="text-sm font-semibold mb-2">Admin Account (optional)</h3>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="adminEmail">Admin Email</Label>
+                <Input
+                  id="adminEmail"
+                  type="email"
+                  value={form.adminEmail}
+                  onChange={(e) => setForm({ ...form, adminEmail: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="adminPassword">Admin Password</Label>
+                <Input
+                  id="adminPassword"
+                  type="password"
+                  minLength={8}
+                  value={form.adminPassword}
+                  onChange={(e) => setForm({ ...form, adminPassword: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="adminFirstName">First Name</Label>
+                <Input
+                  id="adminFirstName"
+                  value={form.adminFirstName}
+                  onChange={(e) => setForm({ ...form, adminFirstName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="adminLastName">Last Name</Label>
+                <Input
+                  id="adminLastName"
+                  value={form.adminLastName}
+                  onChange={(e) => setForm({ ...form, adminLastName: e.target.value })}
                 />
               </div>
             </div>

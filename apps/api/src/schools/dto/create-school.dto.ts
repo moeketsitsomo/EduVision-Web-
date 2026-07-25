@@ -5,6 +5,7 @@ import {
   IsEmail,
   IsUrl,
   Matches,
+  MinLength,
 } from 'class-validator';
 
 export class CreateSchoolDto {
@@ -60,4 +61,21 @@ export class CreateSchoolDto {
   @IsOptional()
   @IsString()
   metaDescription?: string;
+
+  @IsOptional()
+  @IsEmail()
+  adminEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8, { message: 'Admin password must be at least 8 characters' })
+  adminPassword?: string;
+
+  @IsOptional()
+  @IsString()
+  adminFirstName?: string;
+
+  @IsOptional()
+  @IsString()
+  adminLastName?: string;
 }

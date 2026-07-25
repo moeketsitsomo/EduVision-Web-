@@ -17,11 +17,15 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { UserRole } from '@prisma/client';
+import { UsersService } from '../users/users.service';
 
 @Controller('schools')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SchoolsController {
-  constructor(private readonly schoolsService: SchoolsService) {}
+  constructor(
+    private readonly schoolsService: SchoolsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Get()
   @Roles(UserRole.SUPER_ADMIN)
@@ -31,8 +35,22 @@ export class SchoolsController {
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN)
-  create(@Body() dto: CreateSchoolDto) {
-    return this.schoolsService.create(dto);
+  async create(@Body() dto: CreateSchoolDto) {
+    const { adminEmail, adminPassword, adminFirstName, adminLastName, ...schoolData } = dto;
+    const school = await this.schoolsService.create(schoolData);
+
+    if (adminEmail && adminPassword) {
+      await this.usersService.create({
+        email: adminEmail,
+        password: adminPassword,
+        firstName: adminFirstName || 'School',
+        lastName: adminLastName || 'Admin',
+        role: UserRole.SCHOOL_ADMIN,
+        schoolId: school.id,
+      });
+    }
+
+    return school;
   }
 
   @Get(':id')
