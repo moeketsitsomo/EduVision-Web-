@@ -39,6 +39,7 @@ import { LoggerModule } from './logger/logger.module';
 import { AllExceptionsFilter } from './logger/all-exceptions.filter';
 import { CacheModule } from './cache/cache.module';
 import { SetupModule } from './setup/setup.module';
+import { LeadsModule } from './leads/leads.module';
 
 const auditProvider: Provider = {
   provide: APP_INTERCEPTOR,
@@ -91,6 +92,7 @@ const subscriptionGuardProvider: Provider = {
     PublicModule,
     PortalModule,
     SetupModule,
+    LeadsModule,
   ],
   controllers: [HealthController],
   providers: [auditProvider, exceptionFilterProvider, subscriptionGuardProvider, HealthService],
