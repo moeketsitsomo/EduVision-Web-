@@ -42,8 +42,8 @@ Nginx uses `server_name _;` (default server) and passes the `Host` header, so an
    POSTGRES_PASSWORD=a-long-random-password
    JWT_SECRET=another-long-random-string
    COOKIE_DOMAIN=.eduvisionschools.co.za
-   API_URL=https://eduvisionschools.co.za
-   STORAGE_BASE_URL=           # leave empty to serve /uploads via Nginx
+   API_URL=http://localhost:4000
+   STORAGE_BASE_URL=https://eduvisionschools.co.za
    ```
 
 3. For local or first-boot HTTPS testing, you can leave `API_URL` as `http://localhost:4000` and let Nginx terminate SSL.

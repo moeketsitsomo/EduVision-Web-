@@ -21,5 +21,5 @@ docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d
 
 echo "EduVision is deploying. Health checks:"
-echo "  HTTP  : http://localhost/health"
-echo "  HTTPS : https://localhost/health"
+echo "  HTTP  : http://localhost/api/health"
+echo "  HTTPS : https://localhost/api/health"

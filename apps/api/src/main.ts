@@ -67,6 +67,10 @@ async function bootstrap() {
     }),
   );
 
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   const port = config.get<number>('PORT') || 4000;
   await app.listen(port);
   logger.log(`EduVision API running on port ${port}`);
