@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt
 COPY package*.json ./
 COPY apps/web/package*.json apps/web/
 COPY apps/api/package*.json apps/api/
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY apps/web/next.config.mjs apps/web/postcss.config.mjs apps/web/components.json apps/web/tsconfig.json ./apps/web/
 COPY apps/web/src ./apps/web/src

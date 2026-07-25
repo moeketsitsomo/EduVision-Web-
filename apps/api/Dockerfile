@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y python3 make g++ openssl && rm -rf /var
 COPY package*.json ./
 COPY apps/api/package*.json apps/api/
 COPY apps/web/package*.json apps/web/
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY apps/api/prisma ./apps/api/prisma
 COPY apps/api/tsconfig*.json ./apps/api/
