@@ -40,7 +40,7 @@ const A = ({ children, ...props }: ElementProps<'a'>) => (
 );
 
 const Img = ({ src, alt, ...props }: ElementProps<'img'>) => (
-  <img src={src || ''} alt={alt || ''} className="rounded-lg max-w-full my-4" {...props} />
+  <img src={src || ''} alt={alt || ''} loading="lazy" className="rounded-lg max-w-full my-4" {...props} />
 );
 
 const components: Components = {

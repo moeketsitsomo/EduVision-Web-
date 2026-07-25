@@ -108,7 +108,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-2 md:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu">
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>

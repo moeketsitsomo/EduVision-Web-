@@ -171,7 +171,7 @@ export default function SettingsPage() {
                 <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()}>
                   <Upload className="size-4 mr-2" /> Upload Logo
                 </Button>
-                {form.logoUrl && <img src={form.logoUrl} alt="Logo preview" className="h-10 w-auto max-w-[160px] object-contain" />}
+                {form.logoUrl && <img src={form.logoUrl} alt="Logo preview" loading="lazy" className="h-10 w-auto max-w-[160px] object-contain" />}
               </div>
             </div>
             <div className="space-y-2">
@@ -187,7 +187,7 @@ export default function SettingsPage() {
                 <Button type="button" variant="outline" onClick={() => faviconInputRef.current?.click()}>
                   <Upload className="size-4 mr-2" /> Upload Favicon
                 </Button>
-                {form.faviconUrl && <img src={form.faviconUrl} alt="Favicon preview" className="h-8 w-8 object-contain" />}
+                {form.faviconUrl && <img src={form.faviconUrl} alt="Favicon preview" loading="lazy" className="h-8 w-8 object-contain" />}
               </div>
             </div>
             <div className="flex items-center gap-2 md:col-span-2">

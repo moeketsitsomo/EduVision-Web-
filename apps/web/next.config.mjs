@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   eslint: { ignoreDuringBuilds: true },
   images: {
     remotePatterns: [

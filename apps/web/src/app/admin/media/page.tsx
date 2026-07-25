@@ -153,7 +153,7 @@ export default function MediaPage() {
                     <TableRow key={item.id}>
                       <TableCell>
                         {preview ? (
-                          <img src={preview} alt={item.originalName} className="h-12 w-12 rounded object-cover" />
+                          <img src={preview} alt={item.originalName} loading="lazy" className="h-12 w-12 rounded object-cover" />
                         ) : (
                           <Icon className="size-8 text-muted-foreground" />
                         )}
