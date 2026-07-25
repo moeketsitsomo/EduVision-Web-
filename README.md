@@ -4,7 +4,7 @@ A production-ready, multi-tenant School Website Content Management System. Every
 
 Built for commercial deployment: VPS, dedicated server, or any cloud provider. See `DEPLOYMENT.md` and `docs/deployment/` for Ubuntu, DigitalOcean, Hetzner, AWS and Azure guides.
 
-**Latest release: v1.1.0** — adds file uploads, backups, 2FA, password reset, portals, subscriptions/billing, and provider-specific deployment guides. See `RELEASE_NOTES_v1.1.0.md`.
+**Latest release: v1.2.0** — adds first-run setup wizard, system health dashboard, storage/backup reporting, Redis caching, marketing site (landing, pricing, demo, contact), expanded demo data and full launch documentation. See `RELEASE_NOTES_v1.2.0.md` and `CHANGELOG.md`.
 
 ## Features
 
@@ -12,19 +12,20 @@ Built for commercial deployment: VPS, dedicated server, or any cloud provider. S
 - Secure admin dashboard with full CRUD for pages, posts, events, staff, galleries, downloads, fees, contacts, social links, navigation, users, students, notices, admissions, results, attendance, subscriptions, invoices and licenses.
 - Media library for logos, photos, videos, PDFs, newsletters, and policies with local or S3-compatible storage.
 - School branding: colors, logo, favicon, dark mode, custom domain support.
-- Super admin dashboard with platform statistics, subscriptions, licenses, invoices, audit logs, and one-click school creation with auto-provisioned admin accounts.
+- Super admin dashboard with platform statistics, subscriptions, licences, invoices, audit logs, one-click school creation, system health, storage and backup reporting.
 - Parent, Teacher and Learner portals with notices, calendar, results and attendance.
-- Subscription, billing, trial and license management with expired-account enforcement.
+- Subscription, billing, trial and licence management with expired-account enforcement.
 - Two-factor authentication (TOTP) and password-reset via email.
-- Automated daily database backups and production error logging.
+- Redis-backed caching for public endpoints.
+- Automated daily database backups, production error logging and health monitoring.
 - Multi-tenant isolation: each school has its own data, users, branding, and domain.
 - JWT authentication, bcrypt password hashing, role-based access control, audit logs, rate limiting, CSP, and security headers.
 - Mobile-responsive, accessible UI with dark and light mode.
 
 ## Technology Stack
 
-- **Frontend**: Next.js 15 + React 19 + Tailwind CSS 4 + shadcn/ui v4
-- **Backend**: NestJS 10 + Prisma 5 + PostgreSQL 16
+- **Frontend**: Next.js 15 + React 19 + Tailwind CSS 4 + Radix UI components
+- **Backend**: NestJS 11 + Prisma 5 + PostgreSQL 16
 - **Reverse Proxy / SSL**: Nginx + Certbot (Let's Encrypt)
 - **Containerization**: Docker Compose
 - **Authentication**: JWT, bcrypt, Passport, httpOnly cookies
@@ -63,7 +64,7 @@ docker compose up -d postgres redis
 ```bash
 cd apps/api
 npx prisma migrate dev
-npx ts-node prisma/seed.ts
+npx tsx prisma/seed.ts
 cd ../..
 ```
 

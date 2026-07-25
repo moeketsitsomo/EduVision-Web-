@@ -7,9 +7,9 @@ This guide covers deploying the EduVision multi-tenant School Website CMS to a l
 | Service | Technology | Purpose |
 |---|---|---|
 | Web Frontend | Next.js 15 (standalone) | Public school websites and admin dashboard |
-| API Backend | NestJS 10 + Prisma 5 | REST API, auth, CRUD, multi-tenant logic |
+| API Backend | NestJS 11 + Prisma 5 | REST API, auth, CRUD, multi-tenant logic |
 | Database | PostgreSQL 16 | Persistent school data |
-| Cache | Redis 7 | Sessions/cache (ready for future use) |
+| Cache | Redis 7 | Shared cache for public endpoints and multi-instance deployments |
 | Reverse Proxy | Nginx + Certbot | SSL termination, static file serving, routing |
 | File Storage | Local volume (or S3) | Logos, photos, PDFs, newsletters, policies |
 
@@ -57,6 +57,8 @@ Nginx is configured with `server_name _;` (default server), so any domain or sub
 
    API_URL=http://localhost:4000
    STORAGE_BASE_URL=https://eduvisionschools.co.za
+   DEFAULT_SCHOOL_SLUG=demo-school
+   NEXT_PUBLIC_PLATFORM_HOSTS=eduvisionschools.co.za,www.eduvisionschools.co.za
 
    STORAGE_TYPE=local
    STORAGE_LOCAL_ROOT=uploads
@@ -93,8 +95,10 @@ On a fresh database, run:
 docker compose -f docker-compose.prod.yml exec api sh -c "cd apps/api && npx prisma migrate deploy"
 
 # Seed the super admin and demo school
-docker compose -f docker-compose.prod.yml exec api npx ts-node apps/api/prisma/seed.ts
+docker compose -f docker-compose.prod.yml exec api npx tsx apps/api/prisma/seed.ts
 ```
+
+Alternatively, open `https://your-domain/setup` and use the first-run setup wizard to create the platform super admin (this is the recommended method for new installations).
 
 Default credentials after seeding:
 
@@ -118,9 +122,13 @@ For a wildcard certificate (e.g. `*.eduvisionschools.co.za`), use DNS-01 validat
 ## Verifying the Deployment
 
 - Public health check: `https://your-domain/api/health`
+- Detailed health: `https://your-domain/api/health/detailed`
+- Prometheus metrics: `https://your-domain/metrics`
 - Public school site: `https://schoolname.your-domain/`
+- Marketing site: `https://your-domain/`
 - Admin login: `https://your-domain/admin/login`
 - Super admin dashboard: `https://your-domain/admin/super`
+- System health dashboard: `https://your-domain/admin/health`
 
 Health command:
 
@@ -151,6 +159,9 @@ No manual server configuration is required per school.
 | `PORT` | `4000` | API port inside container |
 | `NODE_ENV` | `production` | Runtime environment |
 | `API_URL` | `http://localhost:4000` | Public API base URL (used for links) |
+| `NEXT_PUBLIC_STORAGE_BASE_URL` | `https://eduvisionschools.co.za` | Public base URL for uploaded files |
+| `DEFAULT_SCHOOL_SLUG` | `demo-school` | Fallback school when host does not resolve a tenant |
+| `NEXT_PUBLIC_PLATFORM_HOSTS` | `eduvisionschools.co.za` | Hosts that show the marketing site at `/` |
 | `JWT_SECRET` | `...` | JWT signing secret (min 64 chars) |
 | `JWT_EXPIRES_IN` | `7d` | JWT expiry |
 | `COOKIE_DOMAIN` | `.eduvisionschools.co.za` | Cookie domain for cross-subdomain auth |

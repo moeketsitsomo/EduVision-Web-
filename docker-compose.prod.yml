@@ -116,7 +116,7 @@ services:
       - backups:/backups
       - uploads:/data:ro
       - ./scripts/backup.sh:/usr/local/bin/backup.sh:ro
-    command: sh -c "chmod +x /usr/local/bin/backup.sh && while true; do /usr/local/bin/backup.sh; sleep 86400; done"
+    command: sh -c "while true; do sh /usr/local/bin/backup.sh; sleep 86400; done"
     depends_on:
       postgres:
         condition: service_healthy
