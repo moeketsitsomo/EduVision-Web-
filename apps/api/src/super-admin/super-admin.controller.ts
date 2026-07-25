@@ -21,4 +21,16 @@ export class SuperAdminController {
   activity() {
     return this.superAdminService.getRecentActivity();
   }
+
+  @Get('storage')
+  @Roles(UserRole.SUPER_ADMIN)
+  storage() {
+    return this.superAdminService.getStorageUsage();
+  }
+
+  @Get('backups')
+  @Roles(UserRole.SUPER_ADMIN)
+  backups() {
+    return this.superAdminService.getBackupStatus();
+  }
 }

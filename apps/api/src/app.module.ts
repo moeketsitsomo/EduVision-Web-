@@ -29,6 +29,7 @@ import { SuperAdminModule } from './super-admin/super-admin.module';
 import { StorageModule } from './storage/storage.module';
 import { TenantModule } from './tenant/tenant.module';
 import { HealthController } from './health/health.controller';
+import { HealthService } from './health/health.service';
 import { AuditInterceptor } from './common/audit.interceptor';
 import { SubscriptionGuard } from './common/subscription.guard';
 import { PublicModule } from './public/public.module';
@@ -37,6 +38,7 @@ import { EmailModule } from './email/email.module';
 import { LoggerModule } from './logger/logger.module';
 import { AllExceptionsFilter } from './logger/all-exceptions.filter';
 import { CacheModule } from './cache/cache.module';
+import { SetupModule } from './setup/setup.module';
 
 const auditProvider: Provider = {
   provide: APP_INTERCEPTOR,
@@ -88,8 +90,9 @@ const subscriptionGuardProvider: Provider = {
     SuperAdminModule,
     PublicModule,
     PortalModule,
+    SetupModule,
   ],
   controllers: [HealthController],
-  providers: [auditProvider, exceptionFilterProvider, subscriptionGuardProvider],
+  providers: [auditProvider, exceptionFilterProvider, subscriptionGuardProvider, HealthService],
 })
 export class AppModule {}

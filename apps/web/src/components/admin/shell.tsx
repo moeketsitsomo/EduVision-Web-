@@ -31,6 +31,7 @@ import {
   CreditCard,
   Key,
   FileSpreadsheet,
+  Activity,
 } from 'lucide-react';
 
 const RESOURCE_ICONS: Record<string, LucideIcon> = {
@@ -91,7 +92,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
     })),
     { href: '/admin/media', label: 'Media Library', icon: Images },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
-    ...(role === 'SUPER_ADMIN' ? [{ href: '/admin/super', label: 'Super Admin', icon: Shield }] : []),
+    ...(role === 'SUPER_ADMIN'
+      ? [
+          { href: '/admin/health', label: 'System Health', icon: Activity },
+          { href: '/admin/super', label: 'Super Admin', icon: Shield },
+        ]
+      : []),
   ];
 
   const handleLogout = () => {

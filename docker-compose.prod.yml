@@ -59,6 +59,7 @@ services:
         condition: service_started
     volumes:
       - uploads:/app/uploads
+      - backups:/backups:ro
     expose:
       - '4000'
     restart: unless-stopped
