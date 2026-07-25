@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SCHOOL_ADMIN
+  SCHOOL_STAFF
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+  CANCELLED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  OTHER
+}
+
+model School {
+  id                String            @id @default(cuid())
+  name              String
+  slug              String            @unique
+  customDomain      String?           @unique
+  logoUrl           String?
+  faviconUrl        String?
+  primaryColor      String?           @default("#2563eb")
+  secondaryColor    String?           @default("#1e293b")
+  darkMode          Boolean           @default(false)
+  contactEmail      String?
+  contactPhone      String?
+  address           String?
+  websiteTitle      String?
+  metaDescription   String?
+  isActive          Boolean           @default(true)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  settings          Json?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  users             User[]
+  auditLogs         AuditLog[]
+  pages             Page[]
+  posts             Post[]
+  staff             Staff[]
+  events            Event[]
+  galleries         Gallery[]
+  downloads         Download[]
+  media             Media[]
+  contacts          EmergencyContact[]
+  socials           SocialLink[]
+  navigationItems   NavigationItem[]
+  fees              SchoolFee[]
+  contactMessages   ContactMessage[]
+
+  @@index([slug])
+  @@index([customDomain])
+  @@index([isActive])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  role         UserRole
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  schoolId     String
+  school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  auditLogs    AuditLog[]
+  media        Media[]
+
+  @@unique([email, schoolId])
+  @@index([schoolId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  userId    String?
+  schoolId  String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([schoolId, createdAt])
+  @@index([userId])
+}
+
+model Page {
+  id              String   @id @default(cuid())
+  slug            String
+  title           String
+  subtitle        String?
+  content         String   @default("")
+  bannerImageUrl  String?
+  featuredImageUrl String?
+  isPublished     Boolean  @default(true)
+  showInMenu      Boolean  @default(true)
+  menuOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  schoolId        String
+  school          School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, slug])
+  @@index([schoolId, menuOrder])
+}
+
+model Post {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String
+  summary          String?
+  content          String   @default("")
+  featuredImageUrl String?
+  category         String   @default("news")
+  isPublished      Boolean  @default(true)
+  publishedAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  schoolId         String
+  school           School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, slug])
+  @@index([schoolId, category, publishedAt])
+}
+
+model Staff {
+  id          String   @id @default(cuid())
+  name        String
+  role        String
+  department  String?
+  bio         String?
+  email       String?
+  phone       String?
+  photoUrl    String?
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, order])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime?
+  allDay      Boolean  @default(false)
+  location    String?
+  imageUrl    String?
+  category    String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, startAt])
+}
+
+model Gallery {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  coverImageUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  items       GalleryItem[]
+
+  @@index([schoolId])
+}
+
+model GalleryItem {
+  id       String  @id @default(cuid())
+  caption  String?
+  order    Int     @default(0)
+  mediaId  String
+  media    Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  galleryId String
+  gallery  Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@index([galleryId, order])
+}
+
+model Download {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  fileUrl     String
+  mediaId     String?
+  media       Media?   @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, category])
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  type         MediaType
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  schoolId     String
+  school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  galleryItems  GalleryItem[]
+  downloads     Download[]
+
+  @@index([schoolId, type])
+}
+
+model EmergencyContact {
+  id       String @id @default(cuid())
+  name     String
+  number   String
+  type     String
+  label    String?
+  order    Int    @default(0)
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, order])
+}
+
+model SocialLink {
+  id       String @id @default(cuid())
+  platform String
+  url      String
+  order    Int    @default(0)
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, order])
+}
+
+model SchoolFee {
+  id          String   @id @default(cuid())
+  grade       String
+  item        String
+  amount      Decimal
+  year        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, year])
+}
+
+model NavigationItem {
+  id        String  @id @default(cuid())
+  label     String
+  href      String
+  visible   Boolean @default(true)
+  order     Int     @default(0)
+  isExternal Boolean @default(false)
+  pageId    String?
+  postId    String?
+  schoolId  String
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, order])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, createdAt])
+}
