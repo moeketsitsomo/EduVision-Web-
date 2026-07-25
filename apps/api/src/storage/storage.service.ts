@@ -17,7 +17,7 @@ export class StorageService {
   constructor(private readonly config: ConfigService) {}
 
   get baseUrl(): string {
-    return this.config.get('API_URL') || '';
+    return this.config.get('STORAGE_BASE_URL') ?? this.config.get('API_URL') ?? '';
   }
 
   get root(): string {

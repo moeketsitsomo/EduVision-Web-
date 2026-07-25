@@ -16,11 +16,11 @@ export class UpdateSchoolDto {
   customDomain?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false, require_protocol: true })
   logoUrl?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false, require_protocol: true })
   faviconUrl?: string;
 
   @IsOptional()
