@@ -131,6 +131,7 @@ model School {
   @@index([customDomain])
   @@index([isActive])
   @@index([subscriptionStatus])
+  @@index([trialEndsAt])
 }
 
 model User {
@@ -161,6 +162,8 @@ model User {
   @@unique([email, schoolId])
   @@index([schoolId])
   @@index([studentId])
+  @@index([role])
+  @@index([isActive])
 }
 
 model Student {
@@ -206,6 +209,7 @@ model AuditLog {
   @@index([schoolId, createdAt])
   @@index([userId])
   @@index([action, createdAt])
+  @@index([entity])
 }
 
 model Page {
@@ -488,6 +492,7 @@ model Result {
 
   @@index([schoolId, studentNumber, academicYear, term])
   @@index([schoolId, studentId, academicYear, term])
+  @@index([isPublished])
 }
 
 model Attendance {
@@ -507,6 +512,7 @@ model Attendance {
 
   @@index([schoolId, date, status])
   @@index([schoolId, studentNumber, date])
+  @@index([studentId])
 }
 
 model Subscription {
@@ -561,6 +567,9 @@ model License {
   status    SubscriptionStatus @default(ACTIVE)
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+
+  @@index([status])
+  @@index([endDate])
 }
 
 model PasswordResetToken {
@@ -574,5 +583,6 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([email, schoolId])
+  @@index([tokenHash])
   @@index([expiresAt])
 }
