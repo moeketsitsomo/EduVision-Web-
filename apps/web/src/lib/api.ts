@@ -12,7 +12,7 @@ async function tenantHeaders() {
 export async function fetchSite(): Promise<SiteData> {
   const res = await fetch(`${API_BASE}/public/site`, {
     headers: await tenantHeaders(),
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) throw new Error(`Failed to fetch site: ${res.status}`);
   return (await res.json()) as SiteData;
@@ -21,7 +21,7 @@ export async function fetchSite(): Promise<SiteData> {
 export async function fetchPage(slug: string): Promise<Page | null> {
   const res = await fetch(`${API_BASE}/public/pages/${encodeURIComponent(slug)}`, {
     headers: await tenantHeaders(),
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to fetch page: ${res.status}`);
