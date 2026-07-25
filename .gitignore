@@ -37,6 +37,8 @@ certbot
 # Docker volumes / local state
 postgres_data
 redis_data
+backups
+logs
 
 # Prisma
 *.db
