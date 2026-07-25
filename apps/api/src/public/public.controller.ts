@@ -1,15 +1,23 @@
-import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Tenant } from '../tenant/tenant.decorator';
 import { CreateAdmissionDto } from '../admissions/dto/create-admission.dto';
 import { NoticeAudience } from '@prisma/client';
+import { CacheService } from '../cache/cache.service';
 
 @Controller('public')
 export class PublicController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CacheService) private readonly cache: CacheService,
+  ) {}
 
   @Get('site')
   async site(@Tenant('id') schoolId: string) {
+    const cacheKey = `public:site:${schoolId}`;
+    const cached = await this.cache.get<Record<string, any>>(cacheKey);
+    if (cached) return cached;
+
     const [
       school,
       pages,
@@ -76,7 +84,7 @@ export class PublicController {
       }),
     ]);
 
-    return {
+    const result = {
       school,
       pages,
       posts,
@@ -90,14 +98,21 @@ export class PublicController {
       navigation,
       notices,
     };
+
+    await this.cache.set(cacheKey, result, 60_000);
+    return result;
   }
 
   @Get('notices')
-  notices(
+  async notices(
     @Tenant('id') schoolId: string,
     @Query('audience') audience?: NoticeAudience,
   ) {
-    return this.prisma.notice.findMany({
+    const cacheKey = `public:notices:${schoolId}:${audience || 'all'}`;
+    const cached = await this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = await this.prisma.notice.findMany({
       where: {
         schoolId,
         isPublished: true,
@@ -105,14 +120,24 @@ export class PublicController {
       },
       orderBy: { publishedAt: 'desc' },
     });
+
+    await this.cache.set(cacheKey, result, 60_000);
+    return result;
   }
 
   @Get('calendar')
-  calendar(@Tenant('id') schoolId: string) {
-    return this.prisma.event.findMany({
+  async calendar(@Tenant('id') schoolId: string) {
+    const cacheKey = `public:calendar:${schoolId}`;
+    const cached = await this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = await this.prisma.event.findMany({
       where: { schoolId, isPublished: true },
       orderBy: { startAt: 'asc' },
     });
+
+    await this.cache.set(cacheKey, result, 60_000);
+    return result;
   }
 
   @Post('admissions')
@@ -129,8 +154,15 @@ export class PublicController {
 
   @Get('pages/:slug')
   async page(@Tenant('id') schoolId: string, @Param('slug') slug: string) {
-    return this.prisma.page.findFirst({
+    const cacheKey = `public:page:${schoolId}:${slug}`;
+    const cached = await this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = await this.prisma.page.findFirst({
       where: { schoolId, slug, isPublished: true },
     });
+
+    if (result) await this.cache.set(cacheKey, result, 60_000);
+    return result;
   }
 }

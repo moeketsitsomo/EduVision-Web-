@@ -36,6 +36,7 @@ import { PortalModule } from './portal/portal.module';
 import { EmailModule } from './email/email.module';
 import { LoggerModule } from './logger/logger.module';
 import { AllExceptionsFilter } from './logger/all-exceptions.filter';
+import { CacheModule } from './cache/cache.module';
 
 const auditProvider: Provider = {
   provide: APP_INTERCEPTOR,
@@ -55,6 +56,7 @@ const subscriptionGuardProvider: Provider = {
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../.env', '.env'] }),
+    CacheModule,
     LoggerModule,
     PrismaModule,
     StorageModule,
