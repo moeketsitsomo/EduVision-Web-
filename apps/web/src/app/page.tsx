@@ -4,11 +4,11 @@ import { PublicShell } from '@/components/public/public-shell';
 import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarDays, Newspaper, GraduationCap, ChevronRight } from 'lucide-react';
+import { CalendarDays, Newspaper, GraduationCap, ChevronRight, Megaphone } from 'lucide-react';
 
 export default async function HomePage() {
   const site = await fetchSite();
-  const { school, pages, posts, events } = site;
+  const { school, pages, posts, events, notices } = site;
   const homePage = pages.find((p) => p.slug === 'home') || pages[0];
   const menuPages = pages
     .filter((p) => p.showInMenu)
@@ -35,7 +35,7 @@ export default async function HomePage() {
         {homePage ? <MarkdownRenderer content={homePage.content} /> : <p>Welcome to {school.name}</p>}
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 grid md:grid-cols-3 gap-6">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Latest News</CardTitle>
@@ -53,6 +53,26 @@ export default async function HomePage() {
               </ul>
             ) : (
               <p className="text-sm text-muted-foreground">No news yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Notices</CardTitle>
+            <Megaphone className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {notices?.slice(0, 3).length > 0 ? (
+              <ul className="space-y-2">
+                {notices.slice(0, 3).map((notice) => (
+                  <li key={notice.id} className="text-sm">
+                    {notice.title}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">No notices yet.</p>
             )}
           </CardContent>
         </Card>

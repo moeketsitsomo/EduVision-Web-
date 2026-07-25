@@ -1,6 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Tenant } from '../tenant/tenant.decorator';
+import { CreateAdmissionDto } from '../admissions/dto/create-admission.dto';
+import { NoticeAudience } from '@prisma/client';
 
 @Controller('public')
 export class PublicController {
@@ -20,6 +22,7 @@ export class PublicController {
       socials,
       fees,
       navigation,
+      notices,
     ] = await Promise.all([
       this.prisma.school.findUnique({ where: { id: schoolId } }),
       this.prisma.page.findMany({
@@ -66,6 +69,11 @@ export class PublicController {
         where: { schoolId, visible: true },
         orderBy: [{ order: 'asc' }, { label: 'asc' }],
       }),
+      this.prisma.notice.findMany({
+        where: { schoolId, isPublished: true },
+        orderBy: { publishedAt: 'desc' },
+        take: 20,
+      }),
     ]);
 
     return {
@@ -80,6 +88,49 @@ export class PublicController {
       socials,
       fees,
       navigation,
+      notices,
     };
+  }
+
+  @Get('notices')
+  notices(
+    @Tenant('id') schoolId: string,
+    @Query('audience') audience?: NoticeAudience,
+  ) {
+    return this.prisma.notice.findMany({
+      where: {
+        schoolId,
+        isPublished: true,
+        ...(audience ? { audience: { in: [audience, 'ALL'] } } : {}),
+      },
+      orderBy: { publishedAt: 'desc' },
+    });
+  }
+
+  @Get('calendar')
+  calendar(@Tenant('id') schoolId: string) {
+    return this.prisma.event.findMany({
+      where: { schoolId, isPublished: true },
+      orderBy: { startAt: 'asc' },
+    });
+  }
+
+  @Post('admissions')
+  async apply(@Tenant('id') schoolId: string, @Body() dto: CreateAdmissionDto) {
+    return this.prisma.admissionApplication.create({
+      data: {
+        ...dto,
+        schoolId,
+        dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
+        documentUrls: dto.documentUrls as any,
+      },
+    });
+  }
+
+  @Get('pages/:slug')
+  async page(@Tenant('id') schoolId: string, @Param('slug') slug: string) {
+    return this.prisma.page.findFirst({
+      where: { schoolId, slug, isPublished: true },
+    });
   }
 }

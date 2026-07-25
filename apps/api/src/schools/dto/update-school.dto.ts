@@ -4,7 +4,11 @@ import {
   IsBoolean,
   IsEmail,
   IsUrl,
+  IsEnum,
+  IsInt,
+  Min,
 } from 'class-validator';
+import { PlanType, SubscriptionStatus } from '@prisma/client';
 
 export class UpdateSchoolDto {
   @IsOptional()
@@ -58,4 +62,30 @@ export class UpdateSchoolDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsEnum(SubscriptionStatus)
+  subscriptionStatus?: SubscriptionStatus;
+
+  @IsOptional()
+  @IsEnum(PlanType)
+  plan?: PlanType;
+
+  @IsOptional()
+  @IsEmail()
+  billingEmail?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  maxStorageMb?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  maxUsers?: number;
+
+  @IsOptional()
+  @IsString()
+  licenseKey?: string;
 }

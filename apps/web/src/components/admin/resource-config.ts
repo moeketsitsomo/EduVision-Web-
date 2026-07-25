@@ -1,15 +1,16 @@
-export type FieldType = 'text' | 'textarea' | 'number' | 'switch' | 'datetime-local' | 'url' | 'email';
+export type FieldType = 'text' | 'textarea' | 'number' | 'switch' | 'datetime-local' | 'url' | 'email' | 'select';
 
 export interface FieldConfig {
   name: string;
   label: string;
   type: FieldType;
   required?: boolean;
+  options?: { label: string; value: string }[];
 }
 
 export interface ResourceConfig {
   resource: string;
-  idKey: 'id' | 'slug';
+  idKey: string;
   title: string;
   singular: string;
   fields: FieldConfig[];
@@ -143,6 +144,190 @@ export const RESOURCES: Record<string, ResourceConfig> = {
       { name: 'href', label: 'URL / Path', type: 'text', required: true },
       { name: 'order', label: 'Order', type: 'number' },
       { name: 'visible', label: 'Visible', type: 'switch' },
+    ],
+  },
+  users: {
+    resource: 'users',
+    idKey: 'id',
+    title: 'Users',
+    singular: 'User',
+    fields: [
+      { name: 'email', label: 'Email', type: 'email', required: true },
+      { name: 'firstName', label: 'First Name', type: 'text' },
+      { name: 'lastName', label: 'Last Name', type: 'text' },
+      { name: 'role', label: 'Role', type: 'select', required: true, options: [
+        { label: 'School Admin', value: 'SCHOOL_ADMIN' },
+        { label: 'School Staff', value: 'SCHOOL_STAFF' },
+        { label: 'Teacher', value: 'TEACHER' },
+        { label: 'Parent', value: 'PARENT' },
+        { label: 'Learner', value: 'LEARNER' },
+      ]},
+      { name: 'password', label: 'Password', type: 'text' },
+      { name: 'studentId', label: 'Linked Student ID', type: 'text' },
+      { name: 'isActive', label: 'Active', type: 'switch' },
+    ],
+  },
+  students: {
+    resource: 'students',
+    idKey: 'id',
+    title: 'Students',
+    singular: 'Student',
+    fields: [
+      { name: 'studentNumber', label: 'Student Number', type: 'text', required: true },
+      { name: 'firstName', label: 'First Name', type: 'text', required: true },
+      { name: 'lastName', label: 'Last Name', type: 'text' },
+      { name: 'grade', label: 'Grade', type: 'text' },
+      { name: 'dateOfBirth', label: 'Date of Birth', type: 'datetime-local' },
+      { name: 'parentEmail', label: 'Parent Email', type: 'email' },
+      { name: 'parentPhone', label: 'Parent Phone', type: 'text' },
+      { name: 'gender', label: 'Gender', type: 'text' },
+      { name: 'address', label: 'Address', type: 'textarea' },
+      { name: 'isActive', label: 'Active', type: 'switch' },
+    ],
+  },
+  notices: {
+    resource: 'notices',
+    idKey: 'id',
+    title: 'Notices',
+    singular: 'Notice',
+    fields: [
+      { name: 'title', label: 'Title', type: 'text', required: true },
+      { name: 'content', label: 'Content', type: 'textarea', required: true },
+      { name: 'audience', label: 'Audience', type: 'select', options: [
+        { label: 'All', value: 'ALL' },
+        { label: 'Parents', value: 'PARENTS' },
+        { label: 'Teachers', value: 'TEACHERS' },
+        { label: 'Learners', value: 'LEARNERS' },
+        { label: 'Staff', value: 'STAFF' },
+      ]},
+      { name: 'isPublished', label: 'Published', type: 'switch' },
+      { name: 'publishedAt', label: 'Published At', type: 'datetime-local' },
+    ],
+  },
+  admissions: {
+    resource: 'admissions',
+    idKey: 'id',
+    title: 'Admissions',
+    singular: 'Admission Application',
+    fields: [
+      { name: 'studentFirstName', label: 'Student First Name', type: 'text', required: true },
+      { name: 'studentLastName', label: 'Student Last Name', type: 'text' },
+      { name: 'dateOfBirth', label: 'Date of Birth', type: 'datetime-local' },
+      { name: 'gender', label: 'Gender', type: 'text' },
+      { name: 'gradeApplying', label: 'Grade Applying', type: 'text', required: true },
+      { name: 'previousSchool', label: 'Previous School', type: 'text' },
+      { name: 'parentName', label: 'Parent Name', type: 'text', required: true },
+      { name: 'parentEmail', label: 'Parent Email', type: 'email', required: true },
+      { name: 'parentPhone', label: 'Parent Phone', type: 'text' },
+      { name: 'address', label: 'Address', type: 'textarea' },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Reviewing', value: 'REVIEWING' },
+        { label: 'Accepted', value: 'ACCEPTED' },
+        { label: 'Rejected', value: 'REJECTED' },
+        { label: 'Waitlisted', value: 'WAITLISTED' },
+      ]},
+      { name: 'notes', label: 'Notes', type: 'textarea' },
+    ],
+  },
+  results: {
+    resource: 'results',
+    idKey: 'id',
+    title: 'Results',
+    singular: 'Result',
+    fields: [
+      { name: 'studentNumber', label: 'Student Number', type: 'text' },
+      { name: 'academicYear', label: 'Academic Year', type: 'text', required: true },
+      { name: 'term', label: 'Term', type: 'text', required: true },
+      { name: 'subject', label: 'Subject', type: 'text', required: true },
+      { name: 'score', label: 'Score', type: 'number' },
+      { name: 'maxScore', label: 'Max Score', type: 'number' },
+      { name: 'grade', label: 'Grade', type: 'text' },
+      { name: 'remarks', label: 'Remarks', type: 'textarea' },
+      { name: 'isPublished', label: 'Published', type: 'switch' },
+    ],
+  },
+  attendance: {
+    resource: 'attendance',
+    idKey: 'id',
+    title: 'Attendance',
+    singular: 'Attendance Record',
+    fields: [
+      { name: 'studentNumber', label: 'Student Number', type: 'text' },
+      { name: 'studentName', label: 'Student Name', type: 'text' },
+      { name: 'grade', label: 'Grade', type: 'text' },
+      { name: 'date', label: 'Date', type: 'datetime-local', required: true },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { label: 'Present', value: 'PRESENT' },
+        { label: 'Absent', value: 'ABSENT' },
+        { label: 'Late', value: 'LATE' },
+        { label: 'Excused', value: 'EXCUSED' },
+      ]},
+      { name: 'reason', label: 'Reason', type: 'textarea' },
+    ],
+  },
+  subscriptions: {
+    resource: 'subscriptions',
+    idKey: 'id',
+    title: 'Subscriptions',
+    singular: 'Subscription',
+    fields: [
+      { name: 'schoolId', label: 'School ID', type: 'text', required: true },
+      { name: 'plan', label: 'Plan', type: 'select', options: [
+        { label: 'Basic', value: 'BASIC' },
+        { label: 'Standard', value: 'STANDARD' },
+        { label: 'Premium', value: 'PREMIUM' },
+        { label: 'Enterprise', value: 'ENTERPRISE' },
+      ]},
+      { name: 'billingCycle', label: 'Billing Cycle', type: 'select', options: [
+        { label: 'Monthly', value: 'MONTHLY' },
+        { label: 'Quarterly', value: 'QUARTERLY' },
+        { label: 'Yearly', value: 'YEARLY' },
+      ]},
+      { name: 'price', label: 'Price', type: 'number' },
+      { name: 'autoRenew', label: 'Auto Renew', type: 'switch' },
+      { name: 'startDate', label: 'Start Date', type: 'datetime-local' },
+      { name: 'endDate', label: 'End Date', type: 'datetime-local' },
+    ],
+  },
+  invoices: {
+    resource: 'invoices',
+    idKey: 'id',
+    title: 'Invoices',
+    singular: 'Invoice',
+    fields: [
+      { name: 'schoolId', label: 'School ID', type: 'text', required: true },
+      { name: 'amount', label: 'Amount', type: 'number', required: true },
+      { name: 'tax', label: 'Tax', type: 'number' },
+      { name: 'total', label: 'Total', type: 'number', required: true },
+      { name: 'dueDate', label: 'Due Date', type: 'datetime-local' },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { label: 'Draft', value: 'DRAFT' },
+        { label: 'Sent', value: 'SENT' },
+        { label: 'Paid', value: 'PAID' },
+        { label: 'Overdue', value: 'OVERDUE' },
+        { label: 'Cancelled', value: 'CANCELLED' },
+      ]},
+    ],
+  },
+  licenses: {
+    resource: 'licenses',
+    idKey: 'id',
+    title: 'Licenses',
+    singular: 'License',
+    fields: [
+      { name: 'schoolId', label: 'School ID', type: 'text', required: true },
+      { name: 'key', label: 'License Key', type: 'text' },
+      { name: 'seats', label: 'Seats', type: 'number' },
+      { name: 'startDate', label: 'Start Date', type: 'datetime-local' },
+      { name: 'endDate', label: 'End Date', type: 'datetime-local' },
+      { name: 'status', label: 'Status', type: 'select', options: [
+        { label: 'Active', value: 'ACTIVE' },
+        { label: 'Trial', value: 'TRIAL' },
+        { label: 'Suspended', value: 'SUSPENDED' },
+        { label: 'Cancelled', value: 'CANCELLED' },
+        { label: 'Expired', value: 'EXPIRED' },
+      ]},
     ],
   },
 };

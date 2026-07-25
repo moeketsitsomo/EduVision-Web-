@@ -16,7 +16,6 @@ export class AuditInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest();
-    const res = context.switchToHttp().getResponse();
     const method = req.method;
 
     return next.handle().pipe(
@@ -36,6 +35,8 @@ export class AuditInterceptor implements NestInterceptor {
             entity,
             entityId,
             metadata,
+            req.ip || req.headers['x-forwarded-for']?.toString() || null,
+            req.headers['user-agent']?.toString() || null,
           );
         } catch {}
       }),
@@ -52,6 +53,9 @@ export class AuditInterceptor implements NestInterceptor {
     const clone = { ...body };
     delete clone.password;
     delete clone.passwordHash;
+    delete clone.newPassword;
+    delete clone.totpCode;
+    delete clone.token;
     return clone;
   }
 }

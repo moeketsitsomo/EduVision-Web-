@@ -1,6 +1,6 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, School, SubscriptionStatus } from '@prisma/client';
+import { Prisma, School, SubscriptionStatus, PlanType } from '@prisma/client';
 
 @Injectable()
 export class SchoolsService {
@@ -26,21 +26,40 @@ export class SchoolsService {
     return this.prisma.school.findUnique({ where: { slug: slug.toLowerCase() } });
   }
 
-  async create(data: Prisma.SchoolCreateInput): Promise<School> {
-    const slug = (data.slug as string).toLowerCase();
+  async create(data: Prisma.SchoolCreateInput & { plan?: PlanType; trialDays?: number }): Promise<School> {
+    const { trialDays: _, ...createData } = data as any;
+    const slug = (createData.slug as string).toLowerCase();
     const existing = await this.prisma.school.findFirst({
-      where: { OR: [{ slug }, { customDomain: data.customDomain || undefined }] },
+      where: { OR: [{ slug }, { customDomain: createData.customDomain || undefined }] },
     });
     if (existing) {
       throw new ConflictException('School slug or custom domain already exists');
     }
-    return this.prisma.school.create({
+    const trialDays = data.trialDays ?? 30;
+    const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
+    const plan = createData.plan || PlanType.BASIC;
+
+    const school = await this.prisma.school.create({
       data: {
-        ...data,
+        ...createData,
         slug,
+        plan,
         subscriptionStatus: SubscriptionStatus.TRIAL,
+        trialEndsAt,
       },
     });
+
+    await this.prisma.subscription.create({
+      data: {
+        schoolId: school.id,
+        plan,
+        status: SubscriptionStatus.TRIAL,
+        trialEndsAt,
+        endDate: trialEndsAt,
+      },
+    });
+
+    return school;
   }
 
   async update(id: string, data: Prisma.SchoolUpdateInput): Promise<School> {

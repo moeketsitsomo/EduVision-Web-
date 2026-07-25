@@ -221,6 +221,117 @@ export default function SettingsPage() {
           <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Settings'}</Button>
         </div>
       </form>
+
+      {user && <TwoFactorCard />}
     </div>
+  );
+}
+
+function TwoFactorCard() {
+  const [mode, setMode] = useState<'view' | 'setup' | 'disable'>('view');
+  const [qrCode, setQrCode] = useState('');
+  const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const startSetup = async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch('/auth/2fa/setup', { method: 'POST' });
+      const data = (await res.json()) as { qrCode?: string; secret?: string; message?: string };
+      if (!res.ok) throw new Error(data.message || 'Setup failed');
+      setQrCode(data.qrCode || '');
+      setMode('setup');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Setup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const enable = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await apiFetch('/auth/2fa/enable', {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      });
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) throw new Error(data.message || 'Enable failed');
+      toast.success(data.message || 'Two-factor enabled');
+      setMode('view');
+      setCode('');
+      setQrCode('');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Enable failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const disable = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await apiFetch('/auth/2fa/disable', {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      });
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) throw new Error(data.message || 'Disable failed');
+      toast.success(data.message || 'Two-factor disabled');
+      setMode('view');
+      setPassword('');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Disable failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Two-Factor Authentication</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {mode === 'view' && (
+          <div className="flex gap-2">
+            <Button type="button" onClick={startSetup} disabled={loading}>
+              {loading ? 'Loading...' : 'Set Up 2FA'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setMode('disable')}>
+              Disable 2FA
+            </Button>
+          </div>
+        )}
+        {mode === 'setup' && (
+          <form onSubmit={enable} className="space-y-4">
+            {qrCode && <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />}
+            <div className="space-y-2">
+              <Label htmlFor="totp">Verification Code</Label>
+              <Input id="totp" value={code} onChange={(e) => setCode(e.target.value)} required maxLength={6} />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading}>{loading ? 'Enabling...' : 'Enable 2FA'}</Button>
+              <Button type="button" variant="outline" onClick={() => setMode('view')}>Cancel</Button>
+            </div>
+          </form>
+        )}
+        {mode === 'disable' && (
+          <form onSubmit={disable} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="disablePassword">Current Password</Label>
+              <Input id="disablePassword" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading} variant="destructive">{loading ? 'Disabling...' : 'Disable 2FA'}</Button>
+              <Button type="button" variant="outline" onClick={() => setMode('view')}>Cancel</Button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   );
 }

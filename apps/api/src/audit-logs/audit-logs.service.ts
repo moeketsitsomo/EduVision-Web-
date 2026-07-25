@@ -5,15 +5,26 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuditLogsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  log(schoolId: string | null, userId: string | null, action: string, entity: string, entityId?: string, metadata?: any) {
+  log(
+    schoolId: string | null,
+    userId: string | null,
+    action: string,
+    entity: string,
+    entityId?: string | null,
+    metadata?: any,
+    ipAddress?: string | null,
+    userAgent?: string | null,
+  ) {
     return this.prisma.auditLog.create({
       data: {
         schoolId,
         userId,
         action,
         entity,
-        entityId,
+        entityId: entityId || undefined,
         metadata: metadata || undefined,
+        ipAddress: ipAddress || undefined,
+        userAgent: userAgent || undefined,
       },
     });
   }

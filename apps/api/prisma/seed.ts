@@ -31,6 +31,30 @@ async function main() {
       metaDescription: 'Excellence in education for every learner.',
       isActive: true,
       subscriptionStatus: SubscriptionStatus.ACTIVE,
+      plan: 'BASIC',
+      trialEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  await prisma.subscription.upsert({
+    where: { schoolId: platform.id },
+    update: {},
+    create: {
+      schoolId: platform.id,
+      plan: 'ENTERPRISE',
+      status: 'ACTIVE',
+      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  await prisma.subscription.upsert({
+    where: { schoolId: demoSchool.id },
+    update: {},
+    create: {
+      schoolId: demoSchool.id,
+      plan: 'BASIC',
+      status: 'ACTIVE',
+      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     },
   });
 

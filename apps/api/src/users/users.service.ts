@@ -10,6 +10,7 @@ export interface CreateUserInput {
   lastName?: string;
   role: UserRole;
   schoolId: string;
+  studentId?: string;
 }
 
 export interface UpdateUserInput {
@@ -19,6 +20,7 @@ export interface UpdateUserInput {
   role?: UserRole;
   isActive?: boolean;
   password?: string;
+  studentId?: string;
 }
 
 @Injectable()
@@ -41,6 +43,14 @@ export class UsersService {
     return user;
   }
 
+  async findByIdWithSecret(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    await this.prisma.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
+  }
+
   async findAll(schoolId: string): Promise<Partial<User>[]> {
     return this.prisma.user.findMany({
       where: { schoolId },
@@ -56,6 +66,7 @@ export class UsersService {
         createdAt: true,
         updatedAt: true,
         schoolId: true,
+        studentId: true,
       },
     });
   }
@@ -74,6 +85,7 @@ export class UsersService {
         lastName: data.lastName,
         role: data.role,
         schoolId: data.schoolId,
+        studentId: data.studentId,
       },
     });
   }
@@ -88,6 +100,9 @@ export class UsersService {
     if (password) {
       (updateData as any).passwordHash = await bcrypt.hash(password, 10);
     }
+    if ((updateData as any).studentId === '') {
+      (updateData as any).studentId = null;
+    }
     return this.prisma.user.update({
       where: { id },
       data: updateData,
@@ -100,9 +115,5 @@ export class UsersService {
       throw new BadRequestException('User does not belong to this school');
     }
     return this.prisma.user.delete({ where: { id } });
-  }
-
-  async updateLastLogin(id: string): Promise<void> {
-    await this.prisma.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
   }
 }

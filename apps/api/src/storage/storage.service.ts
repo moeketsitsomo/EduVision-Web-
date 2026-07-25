@@ -3,6 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export interface StoredFile {
   url: string;
@@ -14,7 +21,27 @@ export interface StoredFile {
 
 @Injectable()
 export class StorageService {
-  constructor(private readonly config: ConfigService) {}
+  private s3: S3Client | null = null;
+
+  constructor(private readonly config: ConfigService) {
+    if (this.storageType === 's3') {
+      const endpoint = this.config.get('S3_ENDPOINT');
+      const region = this.config.get('AWS_REGION') || 'us-east-1';
+      this.s3 = new S3Client({
+        region,
+        endpoint: endpoint || undefined,
+        forcePathStyle: !!endpoint,
+        credentials: {
+          accessKeyId: this.config.get('AWS_ACCESS_KEY_ID') || '',
+          secretAccessKey: this.config.get('AWS_SECRET_ACCESS_KEY') || '',
+        },
+      });
+    }
+  }
+
+  get storageType(): 'local' | 's3' {
+    return (this.config.get('STORAGE_TYPE') as any) || 'local';
+  }
 
   get baseUrl(): string {
     return this.config.get('STORAGE_BASE_URL') ?? this.config.get('API_URL') ?? '';
@@ -22,6 +49,10 @@ export class StorageService {
 
   get root(): string {
     return this.config.get('STORAGE_LOCAL_ROOT') || 'uploads';
+  }
+
+  get bucket(): string {
+    return this.config.get('AWS_S3_BUCKET') || '';
   }
 
   async save(file: Express.Multer.File, schoolId: string, folder = 'files'): Promise<StoredFile> {
@@ -32,12 +63,29 @@ export class StorageService {
 
     const ext = path.extname(file.originalname).toLowerCase();
     const safeName = `${uuidv4()}${ext}`;
-    const dir = path.resolve(this.root, schoolId, folder);
-    await fs.mkdir(dir, { recursive: true });
-    const filePath = path.join(dir, safeName);
-    await fs.writeFile(filePath, file.buffer);
+    const key = `uploads/${schoolId}/${folder}/${safeName}`;
 
-    const url = `${this.baseUrl}/uploads/${schoolId}/${folder}/${safeName}`;
+    if (this.storageType === 's3') {
+      if (!this.s3 || !this.bucket) {
+        throw new InternalServerErrorException('S3 storage is not configured');
+      }
+      await this.s3.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+          ContentLength: file.size,
+        }),
+      );
+    } else {
+      const dir = path.resolve(this.root, schoolId, folder);
+      await fs.mkdir(dir, { recursive: true });
+      const filePath = path.join(dir, safeName);
+      await fs.writeFile(filePath, file.buffer);
+    }
+
+    const url = `${this.baseUrl}/${key}`;
     return {
       url,
       filename: safeName,
@@ -48,9 +96,9 @@ export class StorageService {
   }
 
   validate(file: Express.Multer.File): void {
-    const maxBytes = 50 * 1024 * 1024; // 50 MB
+    const maxBytes = parseInt(this.config.get('MAX_UPLOAD_SIZE_MB') || '50', 10) * 1024 * 1024;
     if (file.size > maxBytes) {
-      throw new BadRequestException('File too large (max 50MB)');
+      throw new BadRequestException(`File too large (max ${maxBytes / 1024 / 1024}MB)`);
     }
     const allowed = [
       'image/jpeg',
@@ -58,8 +106,13 @@ export class StorageService {
       'image/webp',
       'image/gif',
       'image/svg+xml',
+      'image/avif',
       'video/mp4',
       'video/webm',
+      'video/mpeg',
+      'audio/mpeg',
+      'audio/wav',
+      'audio/ogg',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -68,6 +121,8 @@ export class StorageService {
       'application/vnd.ms-powerpoint',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'text/plain',
+      'text/csv',
+      'application/zip',
     ];
     if (!allowed.includes(file.mimetype)) {
       throw new BadRequestException('File type not allowed');
@@ -75,15 +130,44 @@ export class StorageService {
   }
 
   async delete(url: string): Promise<void> {
+    const key = this.keyFromUrl(url);
+    if (!key) return;
+
+    if (this.storageType === 's3') {
+      if (this.s3 && this.bucket) {
+        await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+      }
+    } else {
+      const filePath = path.resolve(this.root, key.replace(/^uploads\//, ''));
+      try {
+        await fs.unlink(filePath);
+      } catch {
+        // ignore missing files
+      }
+    }
+  }
+
+  async signedUrl(url: string, expiresInSeconds = 3600): Promise<string> {
+    if (this.storageType !== 's3' || !this.s3 || !this.bucket) return url;
+    const key = this.keyFromUrl(url);
+    if (!key) return url;
+    return getSignedUrl(
+      this.s3,
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      { expiresIn: expiresInSeconds },
+    );
+  }
+
+  private keyFromUrl(url: string): string | null {
+    const base = this.baseUrl;
+    if (url.startsWith(base)) {
+      return url.slice(base.length + 1);
+    }
     const uploads = '/uploads/';
     const idx = url.indexOf(uploads);
-    if (idx === -1) return;
-    const relative = url.slice(idx + uploads.length);
-    const filePath = path.resolve(this.root, relative);
-    try {
-      await fs.unlink(filePath);
-    } catch (e) {
-      // ignore missing files
+    if (idx !== -1) {
+      return url.slice(idx + 1);
     }
+    return null;
   }
 }

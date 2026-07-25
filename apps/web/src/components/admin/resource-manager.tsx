@@ -66,6 +66,7 @@ function formatForSave(config: ResourceConfig, record: RecordData): RecordData {
       v = new Date(v as string).toISOString();
     } else if (typeof v === 'string') {
       v = (v as string).trim();
+      if (!f.required && v === '') continue;
       if (f.name === 'slug') v = (v as string).toLowerCase();
     }
     body[f.name] = v;
@@ -173,6 +174,25 @@ export function ResourceManager({ config }: { config: ResourceConfig }) {
           checked={Boolean(value)}
           onCheckedChange={(v) => setRecord({ ...record, [field.name]: v })}
         />
+      );
+    }
+
+    if (field.type === 'select') {
+      return (
+        <select
+          id={id}
+          required={field.required}
+          value={String(value ?? '')}
+          onChange={(e) => setRecord({ ...record, [field.name]: e.target.value })}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">Select...</option>
+          {field.options?.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       );
     }
 

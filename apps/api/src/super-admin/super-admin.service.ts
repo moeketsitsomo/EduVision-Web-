@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { SubscriptionStatus } from '@prisma/client';
 
 @Injectable()
 export class SuperAdminService {
@@ -10,27 +11,39 @@ export class SuperAdminService {
       totalSchools,
       activeSchools,
       suspendedSchools,
+      trialSchools,
+      expiredSchools,
       totalUsers,
       totalPages,
       totalPosts,
       totalMedia,
+      totalInvoices,
+      unpaidInvoices,
     ] = await Promise.all([
       this.prisma.school.count(),
       this.prisma.school.count({ where: { isActive: true } }),
       this.prisma.school.count({ where: { isActive: false } }),
+      this.prisma.school.count({ where: { subscriptionStatus: 'TRIAL' } }),
+      this.prisma.school.count({ where: { subscriptionStatus: 'EXPIRED' } }),
       this.prisma.user.count(),
       this.prisma.page.count(),
       this.prisma.post.count(),
       this.prisma.media.count(),
+      this.prisma.invoice.count(),
+      this.prisma.invoice.count({ where: { status: { not: 'PAID' } } }),
     ]);
     return {
       totalSchools,
       activeSchools,
       suspendedSchools,
+      trialSchools,
+      expiredSchools,
       totalUsers,
       totalPages,
       totalPosts,
       totalMedia,
+      totalInvoices,
+      unpaidInvoices,
     };
   }
 

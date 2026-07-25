@@ -32,6 +32,9 @@ export function PublicNav({ pages }: { pages: Page[] }) {
             {page.title}
           </Link>
         ))}
+        <Link href="/notices" className="text-sm font-medium hover:opacity-80">Notices</Link>
+        <Link href="/calendar" className="text-sm font-medium hover:opacity-80">Calendar</Link>
+        <Link href="/admissions" className="text-sm font-medium hover:opacity-80">Admissions</Link>
         <ThemeToggle />
       </nav>
 
@@ -56,6 +59,9 @@ export function PublicNav({ pages }: { pages: Page[] }) {
                 {page.title}
               </Link>
             ))}
+            <Link href="/notices" onClick={() => setOpen(false)} className="text-foreground hover:bg-muted px-3 py-2 rounded-md">Notices</Link>
+            <Link href="/calendar" onClick={() => setOpen(false)} className="text-foreground hover:bg-muted px-3 py-2 rounded-md">Calendar</Link>
+            <Link href="/admissions" onClick={() => setOpen(false)} className="text-foreground hover:bg-muted px-3 py-2 rounded-md">Admissions</Link>
             <div className="px-3 py-2">
               <ThemeToggle />
             </div>

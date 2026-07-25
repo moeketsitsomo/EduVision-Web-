@@ -15,6 +15,7 @@ import {
   Newspaper,
   CalendarDays,
   Users,
+  UserCog,
   Image,
   Download,
   DollarSign,
@@ -23,6 +24,13 @@ import {
   Compass,
   Images,
   Settings,
+  Megaphone,
+  ClipboardList,
+  Award,
+  Clock,
+  CreditCard,
+  Key,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 const RESOURCE_ICONS: Record<string, LucideIcon> = {
@@ -36,6 +44,15 @@ const RESOURCE_ICONS: Record<string, LucideIcon> = {
   contacts: Phone,
   socials: Share2,
   navigation: Compass,
+  users: UserCog,
+  students: Users,
+  notices: Megaphone,
+  admissions: ClipboardList,
+  results: Award,
+  attendance: Clock,
+  subscriptions: CreditCard,
+  invoices: FileSpreadsheet,
+  licenses: Key,
 };
 
 interface NavItem {

@@ -6,7 +6,12 @@ import {
   IsUrl,
   Matches,
   MinLength,
+  IsInt,
+  Min,
+  Max,
+  IsEnum,
 } from 'class-validator';
+import { PlanType } from '@prisma/client';
 
 export class CreateSchoolDto {
   @IsString()
@@ -78,4 +83,28 @@ export class CreateSchoolDto {
   @IsOptional()
   @IsString()
   adminLastName?: string;
+
+  @IsOptional()
+  @IsEnum(PlanType)
+  plan?: PlanType;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  trialDays?: number;
+
+  @IsOptional()
+  @IsEmail()
+  billingEmail?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  maxStorageMb?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  maxUsers?: number;
 }

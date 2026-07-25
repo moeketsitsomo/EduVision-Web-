@@ -11,6 +11,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-eduvision}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-eduvision} -d ${POSTGRES_DB:-eduvision}']
       interval: 10s
@@ -21,6 +22,22 @@ services:
     image: redis:7-alpine
     volumes:
       - redis_data:/data
+    restart: unless-stopped
+
+  migrations:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eduvision}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-eduvision}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "cd apps/api && npx prisma migrate deploy"
+    restart: "no"
 
   api:
     build:
@@ -34,12 +51,17 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-eduvision}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-eduvision}?schema=public
       REDIS_URL: redis://redis:6379
     depends_on:
+      migrations:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - uploads:/app/uploads
     expose:
       - '4000'
+    restart: unless-stopped
 
   web:
     build:
@@ -55,6 +77,7 @@ services:
       - api
     expose:
       - '3000'
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -70,6 +93,7 @@ services:
     depends_on:
       - web
       - api
+    restart: unless-stopped
 
   certbot:
     image: certbot/certbot
@@ -77,9 +101,29 @@ services:
       - certbot_data:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h; done'"
+    restart: unless-stopped
+
+  backup:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eduvision}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-eduvision}
+      BACKUP_DIR: /backups
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - backups:/backups
+      - uploads:/data:ro
+      - ./scripts/backup.sh:/usr/local/bin/backup.sh:ro
+    command: sh -c "chmod +x /usr/local/bin/backup.sh && while true; do /usr/local/bin/backup.sh; sleep 86400; done"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
   uploads:
   certbot_data:
+  backups:

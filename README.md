@@ -2,15 +2,21 @@
 
 A production-ready, multi-tenant School Website Content Management System. Every school gets its own public website, secure admin dashboard, branding, and isolated data. A super admin dashboard provisions new schools and their admin accounts automatically.
 
-Built for commercial deployment: VPS, dedicated server, or any cloud provider.
+Built for commercial deployment: VPS, dedicated server, or any cloud provider. See `DEPLOYMENT.md` and `docs/deployment/` for Ubuntu, DigitalOcean, Hetzner, AWS and Azure guides.
+
+**Latest release: v1.1.0** — adds file uploads, backups, 2FA, password reset, portals, subscriptions/billing, and provider-specific deployment guides. See `RELEASE_NOTES_v1.1.0.md`.
 
 ## Features
 
 - Public school website with dynamic CMS pages: Home, About, Principal's Message, Vision & Mission, History, Staff, Academics, Admissions, School Fees, Uniform, Sports, Gallery, News, Events, Downloads, Contact, Emergency Contacts, Social Media.
-- Secure admin dashboard with full CRUD for pages, posts, events, staff, galleries, downloads, fees, contacts, social links, navigation, and users.
-- Media library for logos, photos, videos, PDFs, newsletters, and policies.
+- Secure admin dashboard with full CRUD for pages, posts, events, staff, galleries, downloads, fees, contacts, social links, navigation, users, students, notices, admissions, results, attendance, subscriptions, invoices and licenses.
+- Media library for logos, photos, videos, PDFs, newsletters, and policies with local or S3-compatible storage.
 - School branding: colors, logo, favicon, dark mode, custom domain support.
-- Super admin dashboard with platform statistics, audit logs, and one-click school creation with auto-provisioned admin accounts.
+- Super admin dashboard with platform statistics, subscriptions, licenses, invoices, audit logs, and one-click school creation with auto-provisioned admin accounts.
+- Parent, Teacher and Learner portals with notices, calendar, results and attendance.
+- Subscription, billing, trial and license management with expired-account enforcement.
+- Two-factor authentication (TOTP) and password-reset via email.
+- Automated daily database backups and production error logging.
 - Multi-tenant isolation: each school has its own data, users, branding, and domain.
 - JWT authentication, bcrypt password hashing, role-based access control, audit logs, rate limiting, CSP, and security headers.
 - Mobile-responsive, accessible UI with dark and light mode.

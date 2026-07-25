@@ -28,10 +28,14 @@ interface Stats {
   totalSchools: number;
   activeSchools: number;
   suspendedSchools: number;
+  trialSchools: number;
+  expiredSchools: number;
   totalUsers: number;
   totalPages: number;
   totalPosts: number;
   totalMedia: number;
+  totalInvoices: number;
+  unpaidInvoices: number;
 }
 
 interface Activity {
@@ -58,6 +62,9 @@ const emptySchool = {
   adminPassword: '',
   adminFirstName: '',
   adminLastName: '',
+  plan: 'BASIC',
+  trialDays: '30',
+  billingEmail: '',
 };
 
 export default function SuperAdminPage() {
@@ -97,9 +104,15 @@ export default function SuperAdminPage() {
       return;
     }
     try {
+      const payload = {
+        ...form,
+        trialDays: Number(form.trialDays) || 30,
+        maxStorageMb: 100,
+        maxUsers: 50,
+      };
       await apiFetch('/schools', {
         method: 'POST',
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       toast.success('School created');
       setDialogOpen(false);
@@ -114,11 +127,14 @@ export default function SuperAdminPage() {
     ? [
         { label: 'Total Schools', value: stats.totalSchools },
         { label: 'Active Schools', value: stats.activeSchools },
-        { label: 'Suspended Schools', value: stats.suspendedSchools },
+        { label: 'Trial Schools', value: stats.trialSchools },
+        { label: 'Expired Schools', value: stats.expiredSchools },
         { label: 'Total Users', value: stats.totalUsers },
         { label: 'Total Pages', value: stats.totalPages },
         { label: 'Total Posts', value: stats.totalPosts },
         { label: 'Total Media', value: stats.totalMedia },
+        { label: 'Total Invoices', value: stats.totalInvoices },
+        { label: 'Unpaid Invoices', value: stats.unpaidInvoices },
       ]
     : [];
 
@@ -129,7 +145,7 @@ export default function SuperAdminPage() {
         <Button onClick={() => setDialogOpen(true)}>New School</Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((card) => (
           <Card key={card.label}>
             <CardHeader className="pb-2">
@@ -292,6 +308,38 @@ export default function SuperAdminPage() {
                   id="address"
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billingEmail">Billing Email</Label>
+                <Input
+                  id="billingEmail"
+                  type="email"
+                  value={form.billingEmail}
+                  onChange={(e) => setForm({ ...form, billingEmail: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan">Plan</Label>
+                <select
+                  id="plan"
+                  value={form.plan}
+                  onChange={(e) => setForm({ ...form, plan: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="BASIC">Basic</option>
+                  <option value="STANDARD">Standard</option>
+                  <option value="PREMIUM">Premium</option>
+                  <option value="ENTERPRISE">Enterprise</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="trialDays">Trial Days</Label>
+                <Input
+                  id="trialDays"
+                  type="number"
+                  value={form.trialDays}
+                  onChange={(e) => setForm({ ...form, trialDays: e.target.value })}
                 />
               </div>
               <div className="md:col-span-2 pt-4">

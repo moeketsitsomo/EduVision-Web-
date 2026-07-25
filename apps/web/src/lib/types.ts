@@ -114,6 +114,15 @@ export interface NavigationItem {
   postId?: string | null;
 }
 
+export interface Notice {
+  id: string;
+  title: string;
+  content: string;
+  audience: string;
+  isPublished: boolean;
+  publishedAt?: string | null;
+}
+
 export interface SiteData {
   school: School;
   pages: Page[];
@@ -126,4 +135,5 @@ export interface SiteData {
   socials: SocialLink[];
   fees: Fee[];
   navigation: NavigationItem[];
+  notices: Notice[];
 }
