@@ -156,7 +156,8 @@ No manual server configuration is required per school.
 | `POSTGRES_DB` | `eduvision` | PostgreSQL database |
 | `DATABASE_URL` | `postgresql://...` | Prisma connection string |
 | `REDIS_URL` | `redis://redis:6379` | Redis connection (used for cache/sessions) |
-| `PORT` | `4000` | API port inside container |
+| `API_PORT` | `4000` | API port inside container |
+| `WEB_PORT` | `3000` | Web port inside container |
 | `NODE_ENV` | `production` | Runtime environment |
 | `API_URL` | `http://localhost:4000` | Public API base URL (used for links) |
 | `NEXT_PUBLIC_STORAGE_BASE_URL` | `https://eduvisionschools.co.za` | Public base URL for uploaded files |
