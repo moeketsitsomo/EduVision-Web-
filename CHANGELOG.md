@@ -18,6 +18,9 @@ All notable changes to the EduVision School Website Platform are documented in t
 ### Changed
 
 - `EduVision-Web` continues to contain both the public website and the School CMS; they are logically separated by route and authentication.
+- Added CMS modules for Timetable, Library, Finance, Communication and Reports.
+- Added Prisma models and API endpoints for `TimetableEntry`, `Book`, `Borrowing`, `FinanceTransaction`, `Communication` and `Report`.
+- Added admin resource configuration for new CMS modules with navigation and dashboard cards.
 
 ## [1.2.0] — Launch Readiness
 

@@ -51,3 +51,9 @@ This creates `~/.local/share/applications/eduvision-school-website.desktop` so t
 
 - The desktop app currently requires Node.js and PostgreSQL/Redis locally; a fully bundled installer is planned.
 - `electron-builder` packaging for `.deb`, `.AppImage` and `.exe` is configured but not yet fully verified.
+
+## New in this update
+
+- Added CMS modules for Timetable, Library, Finance, Communication and Reports.
+- Added Prisma models and REST endpoints for `TimetableEntry`, `Book`, `Borrowing`, `FinanceTransaction`, `Communication` and `Report`.
+- Added admin dashboard cards, navigation icons and generic CRUD screens for the new modules.

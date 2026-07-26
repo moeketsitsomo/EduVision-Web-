@@ -14,6 +14,7 @@ import {
   FileText,
   Newspaper,
   CalendarDays,
+  Calendar,
   Users,
   UserCog,
   Image,
@@ -32,6 +33,10 @@ import {
   Key,
   FileSpreadsheet,
   Activity,
+  BookOpen,
+  Receipt,
+  MessageSquare,
+  BarChart3,
 } from 'lucide-react';
 
 const RESOURCE_ICONS: Record<string, LucideIcon> = {
@@ -51,6 +56,12 @@ const RESOURCE_ICONS: Record<string, LucideIcon> = {
   admissions: ClipboardList,
   results: Award,
   attendance: Clock,
+  timetable: Calendar,
+  library: BookOpen,
+  borrowings: BookOpen,
+  finance: Receipt,
+  communication: MessageSquare,
+  reports: BarChart3,
   subscriptions: CreditCard,
   invoices: FileSpreadsheet,
   licenses: Key,
