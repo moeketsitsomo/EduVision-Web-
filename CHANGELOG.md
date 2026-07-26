@@ -2,7 +2,7 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
-## [2.0.0] — Desktop Public App
+## [1.3.0] — Desktop Public App
 
 ### Added
 
@@ -11,14 +11,13 @@ All notable changes to the EduVision School Website Platform are documented in t
 - Standalone application window with desktop menu and icon.
 - Ubuntu `.desktop` entry installer (`scripts/desktop-install-ubuntu.sh`).
 - Windows batch starter (`scripts/desktop-start.bat`).
-- `DISABLE_ADMIN` middleware that redirects `/admin`, `/setup`, etc. to `/`.
+- `DISABLE_ADMIN` middleware that redirects `/admin`, `/setup`, etc. to `/` when running the public desktop build.
 - Electron `session` default `x-school-slug` header for tenant resolution.
 - `postbuild` step to copy static assets into Next.js standalone output.
 
 ### Changed
 
-- `EduVision-Web` now targets public website (parents, learners, visitors, marketing).
-- CMS/admin functionality will move to a separate `EduVision-Admin` product/repository.
+- `EduVision-Web` continues to contain both the public website and the School CMS; they are logically separated by route and authentication.
 
 ## [1.2.0] — Launch Readiness
 
