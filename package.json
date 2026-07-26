@@ -16,6 +16,7 @@
     "db:studio": "cd apps/api && npx prisma studio",
     "db:seed": "cd apps/api && npx tsx prisma/seed.ts",
     "desktop:start": "./scripts/desktop-start.sh",
+    "desktop:build": "cd apps/desktop && npm run build:desktop",
     "desktop:install": "./scripts/desktop-install-ubuntu.sh"
   },
   "overrides": {

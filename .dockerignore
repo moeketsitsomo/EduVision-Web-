@@ -1,0 +1,17 @@
+node_modules
+*.log
+.git
+.env
+.env.local
+.env.*.local
+coverage
+dist
+.next
+out
+uploads
+backups
+logs
+*.zip
+*.tar.gz
+.DS_Store
+Thumbs.db

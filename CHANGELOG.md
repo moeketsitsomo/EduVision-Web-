@@ -21,6 +21,8 @@ All notable changes to the EduVision School Website Platform are documented in t
 - Added CMS modules for Timetable, Library, Finance, Communication and Reports.
 - Added Prisma models and API endpoints for `TimetableEntry`, `Book`, `Borrowing`, `FinanceTransaction`, `Communication` and `Report`.
 - Added admin resource configuration for new CMS modules with navigation and dashboard cards.
+- Improved desktop app: splash screen, EduVision icon/branding, Docker Compose auto-start for PostgreSQL/Redis/API, and one-click launch.
+- Added Linux `.AppImage` and `.deb` installers plus Windows `.exe` installer.
 
 ## [1.2.0] — Launch Readiness
 

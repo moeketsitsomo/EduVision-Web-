@@ -2,6 +2,12 @@
   "name": "eduvision-desktop",
   "version": "1.3.0",
   "private": true,
+  "description": "EduVision School Website desktop application",
+  "homepage": "https://github.com/moeketsitsomo/EduVision-Web-",
+  "author": {
+    "name": "EduVision",
+    "email": "support@eduvision.local"
+  },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -13,7 +19,7 @@
   },
   "devDependencies": {
     "electron": "^41.7.1",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "com.eduvision.desktop",
@@ -28,20 +34,32 @@
     ],
     "extraResources": [
       {
-        "from": "../../apps/api/dist",
-        "to": "api/dist"
+        "from": "../../apps/api",
+        "to": "root/apps/api"
       },
       {
-        "from": "../../apps/api/prisma",
-        "to": "api/prisma"
+        "from": "../../apps/web",
+        "to": "root/apps/web"
       },
       {
-        "from": "../../apps/web/.next/standalone",
-        "to": "web"
+        "from": "../../package.json",
+        "to": "root/package.json"
       },
       {
-        "from": "../../package*.json",
-        "to": "root"
+        "from": "../../package-lock.json",
+        "to": "root/package-lock.json"
+      },
+      {
+        "from": "../../.dockerignore",
+        "to": "root/.dockerignore"
+      },
+      {
+        "from": "../../docker-compose.desktop.yml",
+        "to": "root/docker-compose.desktop.yml"
+      },
+      {
+        "from": "../../.env.example",
+        "to": "root/.env.example"
       }
     ],
     "linux": {
@@ -55,6 +73,9 @@
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg"
     }
   }
 }

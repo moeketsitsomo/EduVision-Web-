@@ -49,11 +49,16 @@ This creates `~/.local/share/applications/eduvision-school-website.desktop` so t
 
 ## Known limitations
 
-- The desktop app currently requires Node.js and PostgreSQL/Redis locally; a fully bundled installer is planned.
-- `electron-builder` packaging for `.deb`, `.AppImage` and `.exe` is configured but not yet fully verified.
+- The desktop app requires Docker and Docker Compose for one-click service startup; a fully bundled offline installer is planned for a future release.
+- macOS `.dmg` packaging is planned for a future release.
 
 ## New in this update
 
 - Added CMS modules for Timetable, Library, Finance, Communication and Reports.
 - Added Prisma models and REST endpoints for `TimetableEntry`, `Book`, `Borrowing`, `FinanceTransaction`, `Communication` and `Report`.
 - Added admin dashboard cards, navigation icons and generic CRUD screens for the new modules.
+- Desktop app improvements:
+  - Splash screen with EduVision branding.
+  - Auto-detect and start PostgreSQL, Redis, API and web services via Docker Compose.
+  - One-click launch from `.AppImage`, `.deb` or Windows `.exe` installer.
+  - Desktop `.desktop` entry and Start Menu shortcut.
