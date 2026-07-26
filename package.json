@@ -1,6 +1,6 @@
 {
   "name": "eduvision",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -14,7 +14,9 @@
     "db:generate": "cd apps/api && npx prisma generate",
     "db:migrate": "cd apps/api && npx prisma migrate dev",
     "db:studio": "cd apps/api && npx prisma studio",
-    "db:seed": "cd apps/api && npx tsx prisma/seed.ts"
+    "db:seed": "cd apps/api && npx tsx prisma/seed.ts",
+    "desktop:start": "./scripts/desktop-start.sh",
+    "desktop:install": "./scripts/desktop-install-ubuntu.sh"
   },
   "overrides": {
     "postcss": "^8.5.23",

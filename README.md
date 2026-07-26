@@ -4,7 +4,44 @@ A production-ready, multi-tenant School Website Content Management System. Every
 
 Built for commercial deployment: VPS, dedicated server, or any cloud provider. See `DEPLOYMENT.md` and `docs/deployment/` for Ubuntu, DigitalOcean, Hetzner, AWS and Azure guides.
 
-**Latest release: v1.2.0** — adds first-run setup wizard, system health dashboard, storage/backup reporting, Redis caching, marketing site (landing, pricing, demo, contact), expanded demo data and full launch documentation. See `RELEASE_NOTES_v1.2.0.md` and `CHANGELOG.md`.
+**Latest release: v2.0.0 (desktop-public branch)** — the public school website is now packaged as a standalone desktop application using Electron. It launches from a desktop icon, starts its own local API and web server, and opens in its own window. Admin/CMS functionality is blocked in the desktop build; the CMS will live in a separate `EduVision-Admin` product/repository. See `RELEASE_NOTES_v2.0.0.md` and `CHANGELOG.md`.
+
+## Desktop Application
+
+The `apps/desktop` Electron shell wraps the public Next.js website and a local NestJS API. It is designed for schools that want to run their public website locally on Ubuntu or Windows and optionally publish it later.
+
+### Run from source (Ubuntu)
+
+```bash
+# Start PostgreSQL and Redis first
+docker compose up -d postgres redis
+
+# Build the API and web app
+npm run build --workspace=@eduvision/api
+npm run build --workspace=web
+
+# Launch the desktop app
+npm run desktop:start
+```
+
+### Install a desktop entry (Ubuntu)
+
+```bash
+npm run desktop:install
+```
+
+This creates `~/.local/share/applications/eduvision-school-website.desktop` so the app appears in the applications menu.
+
+### Windows
+
+Use `scripts/desktop-start.bat` from a command prompt after installing Node.js and running `npm install`.
+
+### How it works
+
+- `apps/desktop/src/main.js` starts the API (`apps/api/dist/src/main.js`) on port 4000 and the Next.js standalone server (`apps/web/.next/standalone/apps/web/server.js`) on port 3000.
+- It then opens a 1280x800 Electron window pointing at `http://localhost:3000`.
+- Admin routes (`/admin`, `/setup`, etc.) are redirected back to `/` by `apps/web/src/middleware.ts` when `DISABLE_ADMIN=true`.
+- The default school tenant is `demo-school`; set `SCHOOL_SLUG` to switch schools.
 
 ## Features
 

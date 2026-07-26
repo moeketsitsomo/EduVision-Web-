@@ -1,0 +1,60 @@
+{
+  "name": "eduvision-desktop",
+  "version": "2.0.0",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:desktop": "electron-builder",
+    "build:dir": "electron-builder --dir"
+  },
+  "dependencies": {
+    "electron-is-dev": "^3.0.1"
+  },
+  "devDependencies": {
+    "electron": "^41.7.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.eduvision.desktop",
+    "productName": "EduVision School Website",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../../apps/api/dist",
+        "to": "api/dist"
+      },
+      {
+        "from": "../../apps/api/prisma",
+        "to": "api/prisma"
+      },
+      {
+        "from": "../../apps/web/.next/standalone",
+        "to": "web"
+      },
+      {
+        "from": "../../package*.json",
+        "to": "root"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Network",
+      "icon": "assets/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    }
+  }
+}

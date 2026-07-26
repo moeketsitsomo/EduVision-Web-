@@ -2,6 +2,24 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
+## [2.0.0] — Desktop Public App
+
+### Added
+
+- New `apps/desktop` Electron shell for the public school website.
+- Auto-start local API (port 4000) and Next.js web server (port 3000).
+- Standalone application window with desktop menu and icon.
+- Ubuntu `.desktop` entry installer (`scripts/desktop-install-ubuntu.sh`).
+- Windows batch starter (`scripts/desktop-start.bat`).
+- `DISABLE_ADMIN` middleware that redirects `/admin`, `/setup`, etc. to `/`.
+- Electron `session` default `x-school-slug` header for tenant resolution.
+- `postbuild` step to copy static assets into Next.js standalone output.
+
+### Changed
+
+- `EduVision-Web` now targets public website (parents, learners, visitors, marketing).
+- CMS/admin functionality will move to a separate `EduVision-Admin` product/repository.
+
 ## [1.2.0] — Launch Readiness
 
 ### Added
