@@ -1,6 +1,6 @@
 {
   "name": "eduvision-desktop",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "description": "EduVision School Website desktop application",
   "homepage": "https://github.com/moeketsitsomo/EduVision-Web-",
@@ -23,7 +23,7 @@
   },
   "build": {
     "appId": "com.eduvision.desktop",
-    "productName": "EduVision School Website",
+    "productName": "EduVision-School-Website",
     "directories": {
       "output": "dist"
     },
@@ -68,11 +68,22 @@
         "deb"
       ],
       "category": "Network",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "executableName": "eduvision-desktop",
+      "desktop": {
+        "Name": "EduVision School Website",
+        "Comment": "Desktop school website application",
+        "Categories": "Network;Education;Office;",
+        "StartupWMClass": "EduVision-School-Website"
+      }
     },
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "artifactName": "EduVision-School-Website-Setup-${version}.${ext}",
+      "shortcutName": "EduVision School Website"
     },
     "mac": {
       "target": "dmg"

@@ -2,6 +2,14 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
+## [1.3.1] — Desktop Packaging Fix
+
+### Fixed
+
+- Desktop `.deb` installer now installs into `/opt/EduVision-School-Website/` (no spaces) so the launcher and `.desktop` `Exec` path work correctly.
+- Set `linux.executableName` to `eduvision-desktop` and `.desktop` `Name` to `EduVision School Website` for a clean application menu entry.
+- Rebuilt `.deb`, `.AppImage` and `.exe` installers for v1.3.1.
+
 ## [1.3.0] — Desktop Public App
 
 ### Added
