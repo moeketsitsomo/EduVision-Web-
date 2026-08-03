@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AdmissionsForm({ schoolId, schoolName }: { schoolId: string; schoolName: string }) {
@@ -39,15 +40,18 @@ export function AdmissionsForm({ schoolId, schoolName }: { schoolId: string; sch
 
   if (submitted) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Application Submitted</h2>
-        <p>Thank you for applying to {schoolName}. We will contact you shortly.</p>
-      </div>
+      <Card>
+        <CardContent className="text-center py-12">
+          <CheckCircle2 className="size-12 text-green-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4">Application Submitted</h2>
+          <p className="text-muted-foreground">Thank you for applying to {schoolName}. We will contact you shortly.</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Apply to {schoolName}</CardTitle>
       </CardHeader>
@@ -100,7 +104,7 @@ export function AdmissionsForm({ schoolId, schoolName }: { schoolId: string; sch
             <Textarea id="address" name="address" />
           </div>
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Submitting...' : 'Submit Application'}
+            <Send className="size-4 mr-2" /> {loading ? 'Submitting...' : 'Submit Application'}
           </Button>
         </form>
       </CardContent>

@@ -2,28 +2,36 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
-## [1.4.0] — Professional Public School Website
+## [1.4.0] — Professional Public School Website (with Polish Release)
 
 ### Added
 
 - New public-facing `apps/web` pages: professional home page, about school, academics, admissions, news & events, gallery and contact.
 - Public multi-school branding with configurable primary/secondary colours, logo, banner, footer text, social links and contact information.
-- Hero section, principal’s welcome message, mission/vision/values, school statistics and quick links on the home page.
-- About school page with history, facilities, awards/achievements and school management/staff cards.
-- Academics page with subjects, curriculum, timetable and academic calendar events.
-- Admissions page with online application form, requirements, school fees and admissions office contact.
-- Parent / Learner Portal with secure login, learner information, attendance, academic reports, notices, homework and report-card download.
+- Large animated hero banner, principal’s welcome message, mission/vision/values, animated school statistics, featured news, upcoming events, school achievements and call-to-action buttons on the home page.
+- About school page with history, at-a-glance stats, facilities, awards/achievements, staff directory grouped by department and school management tab.
+- Academics page with subjects, curriculum, timetable information and academic calendar events.
+- Admissions page with online application form, requirements, required documents, school fees and admissions office contact.
+- Parent / Learner Portal with secure login, learner information, dashboard overview cards, notifications, attendance donut chart, results bar chart, reports, notices, homework and report-card download.
 - News & Events listing, individual news article pages, gallery page and contact page with Google Maps integration.
+- Media Centre with photo/video gallery, album covers, year-based grouping, lightbox preview and lazy-loaded images.
+- School Information sections: staff directory, departments, policies/prospectus downloads, governing body and emergency contacts.
 - `Subject` module with NestJS CRUD and admin resource manager.
 - `ContactMessage` model and `POST /public/contact` endpoint for public contact form submissions.
 - `POST /public/admissions` endpoint for online admission applications.
-- Admin settings page extended to edit all public website / branding fields.
+- Admin settings page extended to edit all public website / branding fields, including logo uploader and colour theme fields.
+- `loading.tsx`, `error.tsx` and `not-found.tsx` pages for better UX.
+- `generateMetadata` on the home page for SEO with Open Graph image support.
+- CSS animations (`fade-in-up`, `fade-in`) and a `CountUp` component for animated statistics.
 - Prisma schema extended with public website fields (`mission`, `vision`, `values`, `history`, `facilities`, `awards`, `officeHours`, `googleMapsUrl`, etc.).
 
 ### Changed
 
-- `PublicShell`, `Header`, `Footer` and `PublicNav` now consume `fetchSite()` data and apply per-school branding.
-- Public navigation cleaned to a fixed set of core links with overflow handling.
+- Modernised UI/UX across public pages: improved responsive spacing, typography, card hover effects, shadows, icons and mobile navigation.
+- Refreshed `Header`, `Footer` and `PublicNav` with active link highlighting, social icons, quick links and emergency contact sections.
+- `PublicShell` applies per-school branding variables to all public pages.
+- Public navigation cleaned to a fixed set of core links with mobile sheet and overflow handling.
+- Contact form and admissions form styled with success states.
 - CMS admin navigation remains separate from the public website.
 
 ## [1.3.1] — Desktop Packaging Fix

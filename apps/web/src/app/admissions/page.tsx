@@ -1,9 +1,16 @@
+import type { Metadata } from 'next';
 import { fetchSite, fetchPage } from '@/lib/api';
+import { schoolMetadata } from '@/lib/metadata';
 import { PublicShell } from '@/components/public/public-shell';
+import { PageHeader } from '@/components/public/page-header';
 import { AdmissionsForm } from '@/components/public/admissions-form';
 import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, FileText, DollarSign, CheckCircle } from 'lucide-react';
+import { Phone, FileText, DollarSign, CheckCircle2, Mail, MapPin, Clock } from 'lucide-react';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return schoolMetadata('Admissions', 'Apply online, view requirements, fees and admissions contact details.');
+}
 
 export default async function AdmissionsPage() {
   const [site, page] = await Promise.all([fetchSite(), fetchPage('admissions').catch(() => null)]);
@@ -23,39 +30,34 @@ export default async function AdmissionsPage() {
 
   return (
     <PublicShell site={site}>
-      <section className="bg-[var(--school-primary)] text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold">Admissions</h1>
-          <p className="mt-4 text-lg opacity-90 max-w-2xl">Apply online, view fees and contact the admissions office.</p>
-        </div>
-      </section>
+      <PageHeader title="Admissions" subtitle="Apply online, view fees and contact the admissions office." />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="grid lg:grid-cols-3 gap-10">
           {/* Application form */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-10">
             {page && (
-              <section className="prose dark:prose-invert max-w-none">
+              <section className="prose dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
                 <MarkdownRenderer content={page.content} />
               </section>
             )}
 
             <section>
-              <h2 className="text-2xl font-bold mb-4">Online Application</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-6">Online Application</h2>
               <AdmissionsForm schoolId={school.id} schoolName={school.name} />
             </section>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            <Card>
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><CheckCircle className="size-5" /> Admission Requirements</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><CheckCircle2 className="size-5 text-[var(--school-primary)]" /> Admission Requirements</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {requirements.map((req, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
+                    <li key={i} className="flex items-start gap-3 text-sm">
                       <FileText className="size-4 mt-0.5 text-[var(--school-primary)]" />
                       {req}
                     </li>
@@ -64,9 +66,9 @@ export default async function AdmissionsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><DollarSign className="size-5" /> School Fees</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><DollarSign className="size-5 text-[var(--school-primary)]" /> School Fees</CardTitle>
               </CardHeader>
               <CardContent>
                 {fees.length > 0 ? (
@@ -84,17 +86,32 @@ export default async function AdmissionsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Phone className="size-5" /> Admissions Office</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><Phone className="size-5 text-[var(--school-primary)]" /> Admissions Office</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                {admissionsPhone && <p><span className="font-semibold">Phone:</span> {admissionsPhone}</p>}
-                {admissionsEmail && <p><span className="font-semibold">Email:</span> <a href={`mailto:${admissionsEmail}`} className="text-[var(--school-primary)] hover:underline">{admissionsEmail}</a></p>}
-                {school.address && <p><span className="font-semibold">Address:</span> {school.address}</p>}
+              <CardContent className="space-y-3 text-sm">
+                {admissionsPhone && (
+                  <p className="flex items-center gap-2">
+                    <Phone className="size-4 text-muted-foreground" />
+                    <a href={`tel:${admissionsPhone}`} className="hover:text-[var(--school-primary)] hover:underline">{admissionsPhone}</a>
+                  </p>
+                )}
+                {admissionsEmail && (
+                  <p className="flex items-center gap-2">
+                    <Mail className="size-4 text-muted-foreground" />
+                    <a href={`mailto:${admissionsEmail}`} className="hover:text-[var(--school-primary)] hover:underline">{admissionsEmail}</a>
+                  </p>
+                )}
+                {school.address && (
+                  <p className="flex items-start gap-2">
+                    <MapPin className="size-4 mt-0.5 text-muted-foreground" />
+                    {school.address}
+                  </p>
+                )}
                 {school.officeHours && (
-                  <div className="pt-2 border-t mt-2">
-                    <p className="font-semibold">Office Hours</p>
+                  <div className="pt-3 border-t mt-3 flex items-start gap-2">
+                    <Clock className="size-4 mt-0.5 text-muted-foreground" />
                     <p className="whitespace-pre-line text-muted-foreground">{school.officeHours}</p>
                   </div>
                 )}

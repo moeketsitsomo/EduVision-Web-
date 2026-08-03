@@ -93,6 +93,7 @@ export interface Gallery {
   id: string;
   title: string;
   description?: string | null;
+  coverImageUrl?: string | null;
   items?: unknown[];
 }
 
@@ -101,6 +102,7 @@ export interface Download {
   title: string;
   description?: string | null;
   fileUrl?: string | null;
+  category?: string | null;
 }
 
 export interface Fee {

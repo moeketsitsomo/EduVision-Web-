@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import { fetchSite } from '@/lib/api';
+import { schoolMetadata } from '@/lib/metadata';
 import { PublicShell } from '@/components/public/public-shell';
+import { PageHeader } from '@/components/public/page-header';
 import { ContactForm } from '@/components/public/contact-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, MapPin, Clock } from 'lucide-react';
+import { Phone, MapPin, Clock, Mail, Globe, AlertCircle } from 'lucide-react';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return schoolMetadata('Contact Us', 'Get in touch with our school office, find directions and emergency contacts.');
+}
 
 export default async function ContactPage() {
   const site = await fetchSite();
@@ -13,24 +20,19 @@ export default async function ContactPage() {
 
   return (
     <PublicShell site={site}>
-      <section className="bg-[var(--school-primary)] text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold">Contact Us</h1>
-          <p className="mt-4 text-lg opacity-90 max-w-2xl">Get in touch with {school.name}.</p>
-        </div>
-      </section>
+      <PageHeader title="Contact Us" subtitle={`Get in touch with ${school.name}.`} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid lg:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="grid lg:grid-cols-2 gap-10">
           <div className="space-y-6">
-            <Card>
+            <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><MapPin className="size-5" /> Visit Us</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><MapPin className="size-5 text-[var(--school-primary)]" /> Visit Us</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                {school.address && <p>{school.address}</p>}
+              <CardContent className="space-y-4 text-sm">
+                {school.address && <p className="text-muted-foreground">{school.address}</p>}
                 {school.googleMapsUrl && (
-                  <div className="mt-4 aspect-video rounded-lg overflow-hidden border">
+                  <div className="aspect-video rounded-lg overflow-hidden border">
                     <iframe
                       title={`${school.name} location`}
                       src={school.googleMapsUrl}
@@ -46,23 +48,33 @@ export default async function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Phone className="size-5" /> Contact Details</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><Phone className="size-5 text-[var(--school-primary)]" /> Contact Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                {school.contactPhone && <p><span className="font-semibold">Phone:</span> {school.contactPhone}</p>}
-                {school.contactEmail && <p><span className="font-semibold">Email:</span> <a href={`mailto:${school.contactEmail}`} className="text-[var(--school-primary)] hover:underline">{school.contactEmail}</a></p>}
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                {school.contactPhone && (
+                  <p className="flex items-center gap-3">
+                    <Phone className="size-4 text-[var(--school-primary)]" />
+                    <a href={`tel:${school.contactPhone}`} className="hover:text-[var(--school-primary)] hover:underline">{school.contactPhone}</a>
+                  </p>
+                )}
+                {school.contactEmail && (
+                  <p className="flex items-center gap-3">
+                    <Mail className="size-4 text-[var(--school-primary)]" />
+                    <a href={`mailto:${school.contactEmail}`} className="hover:text-[var(--school-primary)] hover:underline">{school.contactEmail}</a>
+                  </p>
+                )}
                 {school.officeHours && (
-                  <div className="pt-2 border-t mt-2">
-                    <p className="font-semibold flex items-center gap-2"><Clock className="size-4" /> Office Hours</p>
-                    <p className="whitespace-pre-line text-muted-foreground">{school.officeHours}</p>
+                  <div className="pt-3 border-t mt-2 flex items-start gap-3">
+                    <Clock className="size-4 mt-0.5 text-[var(--school-primary)]" />
+                    <p className="whitespace-pre-line">{school.officeHours}</p>
                   </div>
                 )}
                 {general.length > 0 && (
-                  <ul className="pt-2 border-t mt-2 space-y-1">
+                  <ul className="pt-3 border-t mt-2 space-y-2">
                     {general.map((c) => (
-                      <li key={c.id}>{c.label ? `${c.label}: ` : ''}{c.name} — {c.number}</li>
+                      <li key={c.id}>{c.label ? `${c.label}: ` : ''}{c.name} — <a href={`tel:${c.number}`} className="hover:text-[var(--school-primary)] hover:underline">{c.number}</a></li>
                     ))}
                   </ul>
                 )}
@@ -70,27 +82,27 @@ export default async function ContactPage() {
             </Card>
 
             {emergency.length > 0 && (
-              <Card>
+              <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
                 <CardHeader>
-                  <CardTitle>Emergency Contacts</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400"><AlertCircle className="size-5" /> Emergency Contacts</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-1 text-sm">
+                <CardContent className="space-y-2 text-sm text-red-700 dark:text-red-400">
                   {emergency.map((c) => (
-                    <p key={c.id}>{c.label ? `${c.label}: ` : ''}{c.name} — <a href={`tel:${c.number}`} className="text-[var(--school-primary)] hover:underline">{c.number}</a></p>
+                    <p key={c.id}>{c.label ? `${c.label}: ` : ''}{c.name} — <a href={`tel:${c.number}`} className="underline">{c.number}</a></p>
                   ))}
                 </CardContent>
               </Card>
             )}
 
             {socials.length > 0 && (
-              <Card>
+              <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
                 <CardHeader>
-                  <CardTitle>Follow Us</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-lg"><Globe className="size-5 text-[var(--school-primary)]" /> Follow Us</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2">
                     {socials.map((s) => (
-                      <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="text-sm px-3 py-1 rounded-full bg-muted hover:bg-muted/80">{s.platform}</a>
+                      <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="text-sm px-4 py-2 rounded-full bg-muted hover:bg-[var(--school-primary)] hover:text-white transition-colors">{s.platform}</a>
                     ))}
                   </div>
                 </CardContent>
@@ -99,7 +111,7 @@ export default async function ContactPage() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold mb-4">Send a Message</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6">Send a Message</h2>
             <ContactForm schoolName={school.name} />
           </div>
         </div>
