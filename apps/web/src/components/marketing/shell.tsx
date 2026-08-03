@@ -12,7 +12,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link href="/pricing" className="hover:text-primary">Pricing</Link>
             <Link href="/demo" className="hover:text-primary">Request a Demo</Link>
-            <Link href="/contact" className="hover:text-primary">Contact Sales</Link>
+            <Link href="/contact-sales" className="hover:text-primary">Contact Sales</Link>
             <Button asChild size="sm">
               <Link href="/admin/login">Login</Link>
             </Button>
@@ -31,7 +31,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
           <div className="flex gap-4">
             <Link href="/pricing" className="hover:text-foreground">Pricing</Link>
             <Link href="/demo" className="hover:text-foreground">Demo</Link>
-            <Link href="/contact" className="hover:text-foreground">Contact</Link>
+            <Link href="/contact-sales" className="hover:text-foreground">Contact Sales</Link>
           </div>
         </div>
       </footer>

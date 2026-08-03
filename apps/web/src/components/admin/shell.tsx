@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 
 const RESOURCE_ICONS: Record<string, LucideIcon> = {
+  subjects: BookOpen,
   pages: FileText,
   posts: Newspaper,
   events: CalendarDays,

@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, Post, Body, Inject } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { Tenant } from '../tenant/tenant.decorator';
 import { CreateAdmissionDto } from '../admissions/dto/create-admission.dto';
+import { ContactMessageDto } from './dto/contact-message.dto';
 import { NoticeAudience } from '@prisma/client';
 import { CacheService } from '../cache/cache.service';
 
@@ -31,6 +32,7 @@ export class PublicController {
       fees,
       navigation,
       notices,
+      subjects,
     ] = await Promise.all([
       this.prisma.school.findUnique({ where: { id: schoolId } }),
       this.prisma.page.findMany({
@@ -82,6 +84,10 @@ export class PublicController {
         orderBy: { publishedAt: 'desc' },
         take: 20,
       }),
+      this.prisma.subject.findMany({
+        where: { schoolId, isPublished: true },
+        orderBy: [{ order: 'asc' }, { name: 'asc' }],
+      }),
     ]);
 
     const result = {
@@ -97,6 +103,7 @@ export class PublicController {
       fees,
       navigation,
       notices,
+      subjects,
     };
 
     await this.cache.set(cacheKey, result, 60_000);
@@ -148,6 +155,16 @@ export class PublicController {
         schoolId,
         dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
         documentUrls: dto.documentUrls as any,
+      },
+    });
+  }
+
+  @Post('contact')
+  async contact(@Tenant('id') schoolId: string, @Body() dto: ContactMessageDto) {
+    return this.prisma.contactMessage.create({
+      data: {
+        ...dto,
+        schoolId,
       },
     });
   }

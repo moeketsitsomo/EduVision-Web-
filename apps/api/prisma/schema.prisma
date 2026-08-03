@@ -83,6 +83,7 @@ model School {
   customDomain        String?            @unique
   logoUrl             String?
   faviconUrl          String?
+  bannerImageUrl      String?
   primaryColor        String?            @default("#2563eb")
   secondaryColor      String?            @default("#1e293b")
   darkMode            Boolean            @default(false)
@@ -90,8 +91,28 @@ model School {
   contactPhone        String?
   address             String?
   billingEmail        String?
+  admissionsEmail     String?
+  admissionsPhone     String?
   websiteTitle        String?
   metaDescription     String?
+  footerText          String?
+  principalName       String?
+  principalMessage    String?
+  mission             String?
+  vision              String?
+  values              String?
+  history             String?
+  establishedYear     Int?
+  enrollmentCount     Int?
+  teacherCount        Int?
+  classroomCount      Int?
+  passRate            Float?
+  facilities          Json?
+  awards              Json?
+  officeHours         String?
+  googleMapsUrl       String?
+  locationLat         Float?
+  locationLng         Float?
   isActive            Boolean            @default(true)
   subscriptionStatus  SubscriptionStatus @default(TRIAL)
   trialEndsAt         DateTime?
@@ -132,6 +153,8 @@ model School {
   financeTransactions FinanceTransaction[]
   communications      Communication[]
   reports             Report[]
+  subjects            Subject[]
+  homework            Homework[]
 
   @@index([slug])
   @@index([customDomain])
@@ -192,6 +215,7 @@ model Student {
   users        User[]
   results      Result[]
   attendance   Attendance[]
+  homework     Homework[]
 
   @@unique([schoolId, studentNumber])
   @@index([schoolId])
@@ -700,4 +724,43 @@ model Report {
 
   @@index([schoolId, type])
   @@index([schoolId, status])
+}
+
+model Subject {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name        String
+  code        String?
+  grade       String?
+  description String?
+  category    String?
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId, order])
+  @@index([schoolId, grade])
+}
+
+model Homework {
+  id          String    @id @default(cuid())
+  schoolId    String
+  school      School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentId   String?
+  student     Student?  @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  grade       String?
+  subject     String
+  title       String
+  description String?
+  fileUrl     String?
+  assignedAt  DateTime  @default(now())
+  dueDate     DateTime?
+  isPublished Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([schoolId, grade])
+  @@index([schoolId, studentId])
 }

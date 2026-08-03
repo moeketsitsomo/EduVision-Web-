@@ -26,6 +26,7 @@ import { LibraryModule } from './library/library.module';
 import { FinanceModule } from './finance/finance.module';
 import { CommunicationModule } from './communication/communication.module';
 import { ReportsModule } from './reports/reports.module';
+import { SubjectsModule } from './subjects/subjects.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { LicensesModule } from './licenses/licenses.module';
@@ -94,6 +95,7 @@ const subscriptionGuardProvider: Provider = {
     FinanceModule,
     CommunicationModule,
     ReportsModule,
+    SubjectsModule,
     SubscriptionsModule,
     InvoicesModule,
     LicensesModule,

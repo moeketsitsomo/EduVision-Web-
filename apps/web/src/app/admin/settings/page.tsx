@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
@@ -22,13 +23,34 @@ interface SchoolForm {
   customDomain: string;
   websiteTitle: string;
   metaDescription: string;
+  footerText: string;
   primaryColor: string;
   secondaryColor: string;
   contactEmail: string;
   contactPhone: string;
+  admissionsEmail: string;
+  admissionsPhone: string;
   address: string;
   logoUrl: string;
   faviconUrl: string;
+  bannerImageUrl: string;
+  principalName: string;
+  principalMessage: string;
+  mission: string;
+  vision: string;
+  values: string;
+  history: string;
+  establishedYear: string;
+  enrollmentCount: string;
+  teacherCount: string;
+  classroomCount: string;
+  passRate: string;
+  facilities: string;
+  awards: string;
+  officeHours: string;
+  googleMapsUrl: string;
+  locationLat: string;
+  locationLng: string;
   darkMode: boolean;
   isActive: boolean;
 }
@@ -39,16 +61,74 @@ const emptySchool: SchoolForm = {
   customDomain: '',
   websiteTitle: '',
   metaDescription: '',
+  footerText: '',
   primaryColor: '#2563eb',
   secondaryColor: '#1e293b',
   contactEmail: '',
   contactPhone: '',
+  admissionsEmail: '',
+  admissionsPhone: '',
   address: '',
   logoUrl: '',
   faviconUrl: '',
+  bannerImageUrl: '',
+  principalName: '',
+  principalMessage: '',
+  mission: '',
+  vision: '',
+  values: '',
+  history: '',
+  establishedYear: '',
+  enrollmentCount: '',
+  teacherCount: '',
+  classroomCount: '',
+  passRate: '',
+  facilities: '',
+  awards: '',
+  officeHours: '',
+  googleMapsUrl: '',
+  locationLat: '',
+  locationLng: '',
   darkMode: false,
   isActive: true,
 };
+
+function normalizeSchool(school: any): Partial<SchoolForm> {
+  const normalized: any = { ...school };
+  if (Array.isArray(school.facilities)) {
+    normalized.facilities = school.facilities.map((f: any) => (typeof f === 'string' ? f : f.name)).join('\n');
+  }
+  if (Array.isArray(school.awards)) {
+    normalized.awards = JSON.stringify(school.awards, null, 2);
+  }
+  ['establishedYear', 'enrollmentCount', 'teacherCount', 'classroomCount'].forEach((k) => {
+    if (school[k] != null) normalized[k] = String(school[k]);
+  });
+  if (school.passRate != null) normalized.passRate = String(school.passRate);
+  if (school.locationLat != null) normalized.locationLat = String(school.locationLat);
+  if (school.locationLng != null) normalized.locationLng = String(school.locationLng);
+  return normalized;
+}
+
+function prepareSave(form: SchoolForm): any {
+  const save: any = { ...form };
+  save.facilities = form.facilities
+    .split('\n')
+    .map((f) => f.trim())
+    .filter(Boolean);
+  try {
+    save.awards = form.awards ? JSON.parse(form.awards) : [];
+  } catch {
+    save.awards = form.awards.split('\n').map((line) => ({ title: line.trim() })).filter((a) => a.title);
+  }
+  ['establishedYear', 'enrollmentCount', 'teacherCount', 'classroomCount'].forEach((k) => {
+    save[k] = form[k as keyof SchoolForm] ? parseInt(form[k as keyof SchoolForm] as string, 10) : null;
+  });
+  save.passRate = form.passRate ? parseFloat(form.passRate) : null;
+  save.locationLat = form.locationLat ? parseFloat(form.locationLat) : null;
+  save.locationLng = form.locationLng ? parseFloat(form.locationLng) : null;
+  return save;
+}
 
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -57,6 +137,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const faviconInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -66,8 +147,8 @@ export default function SettingsPage() {
         const me = (await meRes.json()) as User;
         setUser(me);
         const schoolRes = await apiFetch(`/schools/${me.schoolId}`);
-        const school = (await schoolRes.json()) as Partial<SchoolForm>;
-        setForm({ ...emptySchool, ...school });
+        const school = (await schoolRes.json()) as any;
+        setForm({ ...emptySchool, ...normalizeSchool(school) });
       } catch (e) {
         toast.error(e instanceof Error ? e.message : 'Failed to load settings');
       } finally {
@@ -77,14 +158,14 @@ export default function SettingsPage() {
     load();
   }, []);
 
-  const uploadFile = async (file: File, field: 'logoUrl' | 'faviconUrl') => {
+  const uploadFile = async (file: File, field: keyof SchoolForm) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
       const res = await apiFetch('/media/upload', { method: 'POST', body: formData });
       const data = (await res.json()) as { url: string };
       setForm((prev) => ({ ...prev, [field]: data.url }));
-      toast.success(`${field === 'logoUrl' ? 'Logo' : 'Favicon'} uploaded`);
+      toast.success(`${field.replace('Url', '')} uploaded`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
     }
@@ -101,12 +182,7 @@ export default function SettingsPage() {
     try {
       await apiFetch(`/schools/${user.schoolId}`, {
         method: 'PATCH',
-        body: JSON.stringify({
-          ...form,
-          primaryColor: form.primaryColor,
-          secondaryColor: form.secondaryColor,
-          darkMode: form.darkMode,
-        }),
+        body: JSON.stringify(prepareSave(form)),
       });
       toast.success('School settings saved');
     } catch (err) {
@@ -158,36 +234,32 @@ export default function SettingsPage() {
               <Label htmlFor="metaDescription">Meta Description</Label>
               <Input id="metaDescription" value={form.metaDescription} onChange={(e) => handleChange('metaDescription', e.target.value)} />
             </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="footerText">Footer Text</Label>
+              <Input id="footerText" value={form.footerText} onChange={(e) => handleChange('footerText', e.target.value)} />
+            </div>
             <div className="space-y-2">
               <Label>Logo</Label>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], 'logoUrl')}
-              />
+              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], 'logoUrl')} />
               <div className="flex items-center gap-4">
-                <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()}>
-                  <Upload className="size-4 mr-2" /> Upload Logo
-                </Button>
+                <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()}><Upload className="size-4 mr-2" /> Upload Logo</Button>
                 {form.logoUrl && <img src={form.logoUrl} alt="Logo preview" loading="lazy" className="h-10 w-auto max-w-[160px] object-contain" />}
               </div>
             </div>
             <div className="space-y-2">
               <Label>Favicon</Label>
-              <input
-                ref={faviconInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], 'faviconUrl')}
-              />
+              <input ref={faviconInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], 'faviconUrl')} />
               <div className="flex items-center gap-4">
-                <Button type="button" variant="outline" onClick={() => faviconInputRef.current?.click()}>
-                  <Upload className="size-4 mr-2" /> Upload Favicon
-                </Button>
+                <Button type="button" variant="outline" onClick={() => faviconInputRef.current?.click()}><Upload className="size-4 mr-2" /> Upload Favicon</Button>
                 {form.faviconUrl && <img src={form.faviconUrl} alt="Favicon preview" loading="lazy" className="h-8 w-8 object-contain" />}
+              </div>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Banner Image</Label>
+              <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], 'bannerImageUrl')} />
+              <div className="flex items-center gap-4">
+                <Button type="button" variant="outline" onClick={() => bannerInputRef.current?.click()}><Upload className="size-4 mr-2" /> Upload Banner</Button>
+                {form.bannerImageUrl && <img src={form.bannerImageUrl} alt="Banner preview" loading="lazy" className="h-16 w-auto max-w-[200px] object-cover rounded" />}
               </div>
             </div>
             <div className="flex items-center gap-2 md:col-span-2">
@@ -203,16 +275,116 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="contactEmail">Contact Email</Label>
+              <Label htmlFor="contactEmail">General Email</Label>
               <Input id="contactEmail" type="email" value={form.contactEmail} onChange={(e) => handleChange('contactEmail', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contactPhone">Contact Phone</Label>
+              <Label htmlFor="contactPhone">General Phone</Label>
               <Input id="contactPhone" value={form.contactPhone} onChange={(e) => handleChange('contactPhone', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admissionsEmail">Admissions Email</Label>
+              <Input id="admissionsEmail" type="email" value={form.admissionsEmail} onChange={(e) => handleChange('admissionsEmail', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admissionsPhone">Admissions Phone</Label>
+              <Input id="admissionsPhone" value={form.admissionsPhone} onChange={(e) => handleChange('admissionsPhone', e.target.value)} />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="address">Address</Label>
-              <Input id="address" value={form.address} onChange={(e) => handleChange('address', e.target.value)} />
+              <Textarea id="address" value={form.address} onChange={(e) => handleChange('address', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="officeHours">Office Hours</Label>
+              <Textarea id="officeHours" value={form.officeHours} onChange={(e) => handleChange('officeHours', e.target.value)} placeholder="Mon – Fri: 07:30 – 15:30" />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="googleMapsUrl">Google Maps Embed URL</Label>
+              <Input id="googleMapsUrl" value={form.googleMapsUrl} onChange={(e) => handleChange('googleMapsUrl', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="locationLat">Latitude</Label>
+              <Input id="locationLat" value={form.locationLat} onChange={(e) => handleChange('locationLat', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="locationLng">Longitude</Label>
+              <Input id="locationLng" value={form.locationLng} onChange={(e) => handleChange('locationLng', e.target.value)} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>About the School</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="principalName">Principal Name</Label>
+              <Input id="principalName" value={form.principalName} onChange={(e) => handleChange('principalName', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="establishedYear">Established Year</Label>
+              <Input id="establishedYear" value={form.establishedYear} onChange={(e) => handleChange('establishedYear', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="principalMessage">Principal&apos;s Welcome Message</Label>
+              <Textarea id="principalMessage" rows={3} value={form.principalMessage} onChange={(e) => handleChange('principalMessage', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="history">School History</Label>
+              <Textarea id="history" rows={4} value={form.history} onChange={(e) => handleChange('history', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="mission">Mission</Label>
+              <Textarea id="mission" rows={2} value={form.mission} onChange={(e) => handleChange('mission', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="vision">Vision</Label>
+              <Textarea id="vision" rows={2} value={form.vision} onChange={(e) => handleChange('vision', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="values">Values (one per line)</Label>
+              <Textarea id="values" rows={3} value={form.values} onChange={(e) => handleChange('values', e.target.value)} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>School Statistics</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="enrollmentCount">Learners</Label>
+              <Input id="enrollmentCount" type="number" value={form.enrollmentCount} onChange={(e) => handleChange('enrollmentCount', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="teacherCount">Teachers</Label>
+              <Input id="teacherCount" type="number" value={form.teacherCount} onChange={(e) => handleChange('teacherCount', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="classroomCount">Classrooms</Label>
+              <Input id="classroomCount" type="number" value={form.classroomCount} onChange={(e) => handleChange('classroomCount', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="passRate">Pass Rate (%)</Label>
+              <Input id="passRate" type="number" value={form.passRate} onChange={(e) => handleChange('passRate', e.target.value)} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Facilities & Awards</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="facilities">Facilities (one per line)</Label>
+              <Textarea id="facilities" rows={4} value={form.facilities} onChange={(e) => handleChange('facilities', e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="awards">Awards (JSON or one per line)</Label>
+              <Textarea id="awards" rows={4} value={form.awards} onChange={(e) => handleChange('awards', e.target.value)} placeholder='[{"year":2024,"title":"Best School"}]' />
             </div>
           </CardContent>
         </Card>

@@ -2,6 +2,30 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
+## [1.4.0] — Professional Public School Website
+
+### Added
+
+- New public-facing `apps/web` pages: professional home page, about school, academics, admissions, news & events, gallery and contact.
+- Public multi-school branding with configurable primary/secondary colours, logo, banner, footer text, social links and contact information.
+- Hero section, principal’s welcome message, mission/vision/values, school statistics and quick links on the home page.
+- About school page with history, facilities, awards/achievements and school management/staff cards.
+- Academics page with subjects, curriculum, timetable and academic calendar events.
+- Admissions page with online application form, requirements, school fees and admissions office contact.
+- Parent / Learner Portal with secure login, learner information, attendance, academic reports, notices, homework and report-card download.
+- News & Events listing, individual news article pages, gallery page and contact page with Google Maps integration.
+- `Subject` module with NestJS CRUD and admin resource manager.
+- `ContactMessage` model and `POST /public/contact` endpoint for public contact form submissions.
+- `POST /public/admissions` endpoint for online admission applications.
+- Admin settings page extended to edit all public website / branding fields.
+- Prisma schema extended with public website fields (`mission`, `vision`, `values`, `history`, `facilities`, `awards`, `officeHours`, `googleMapsUrl`, etc.).
+
+### Changed
+
+- `PublicShell`, `Header`, `Footer` and `PublicNav` now consume `fetchSite()` data and apply per-school branding.
+- Public navigation cleaned to a fixed set of core links with overflow handling.
+- CMS admin navigation remains separate from the public website.
+
 ## [1.3.1] — Desktop Packaging Fix
 
 ### Fixed

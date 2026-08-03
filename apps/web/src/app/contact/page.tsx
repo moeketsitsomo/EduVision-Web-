@@ -1,85 +1,109 @@
-'use client';
+import { fetchSite } from '@/lib/api';
+import { PublicShell } from '@/components/public/public-shell';
+import { ContactForm } from '@/components/public/contact-form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Phone, MapPin, Clock } from 'lucide-react';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { MarketingShell } from '@/components/marketing/shell';
-import { toast } from 'sonner';
+export default async function ContactPage() {
+  const site = await fetchSite();
+  const { school, contacts, socials } = site;
 
-export default function ContactSalesPage() {
-  const [form, setForm] = useState({ name: '', email: '', school: '', phone: '', message: '' });
-  const [busy, setBusy] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const res = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'contact', ...form }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to submit');
-      setSubmitted(true);
-      toast.success(data.message);
-    } catch (err: any) {
-      toast.error(err.message || 'Something went wrong');
-    } finally {
-      setBusy(false);
-    }
-  };
+  const general = contacts.filter((c) => c.type === 'general' || c.type === 'office');
+  const emergency = contacts.filter((c) => c.type === 'emergency');
 
   return (
-    <MarketingShell>
-      <section className="py-20 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Contact Sales</CardTitle>
-            <CardDescription>
-              Get in touch with our team for custom pricing, enterprise plans or partnership enquiries.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {submitted ? (
-              <div className="text-center py-8">
-                <h3 className="text-xl font-semibold">Message sent</h3>
-                <p className="text-muted-foreground mt-2">A member of our team will respond as soon as possible.</p>
-              </div>
-            ) : (
-              <form onSubmit={submit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Your name</Label>
-                  <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="school">School / Organisation</Label>
-                  <Input id="school" value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea id="message" rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-                </div>
-                <Button type="submit" className="w-full" disabled={busy}>
-                  {busy ? 'Sending...' : 'Send Message'}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+    <PublicShell site={site}>
+      <section className="bg-[var(--school-primary)] text-white py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl md:text-5xl font-bold">Contact Us</h1>
+          <p className="mt-4 text-lg opacity-90 max-w-2xl">Get in touch with {school.name}.</p>
+        </div>
       </section>
-    </MarketingShell>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><MapPin className="size-5" /> Visit Us</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                {school.address && <p>{school.address}</p>}
+                {school.googleMapsUrl && (
+                  <div className="mt-4 aspect-video rounded-lg overflow-hidden border">
+                    <iframe
+                      title={`${school.name} location`}
+                      src={school.googleMapsUrl}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Phone className="size-5" /> Contact Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                {school.contactPhone && <p><span className="font-semibold">Phone:</span> {school.contactPhone}</p>}
+                {school.contactEmail && <p><span className="font-semibold">Email:</span> <a href={`mailto:${school.contactEmail}`} className="text-[var(--school-primary)] hover:underline">{school.contactEmail}</a></p>}
+                {school.officeHours && (
+                  <div className="pt-2 border-t mt-2">
+                    <p className="font-semibold flex items-center gap-2"><Clock className="size-4" /> Office Hours</p>
+                    <p className="whitespace-pre-line text-muted-foreground">{school.officeHours}</p>
+                  </div>
+                )}
+                {general.length > 0 && (
+                  <ul className="pt-2 border-t mt-2 space-y-1">
+                    {general.map((c) => (
+                      <li key={c.id}>{c.label ? `${c.label}: ` : ''}{c.name} — {c.number}</li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+
+            {emergency.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Emergency Contacts</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1 text-sm">
+                  {emergency.map((c) => (
+                    <p key={c.id}>{c.label ? `${c.label}: ` : ''}{c.name} — <a href={`tel:${c.number}`} className="text-[var(--school-primary)] hover:underline">{c.number}</a></p>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {socials.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Follow Us</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-3">
+                    {socials.map((s) => (
+                      <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="text-sm px-3 py-1 rounded-full bg-muted hover:bg-muted/80">{s.platform}</a>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Send a Message</h2>
+            <ContactForm schoolName={school.name} />
+          </div>
+        </div>
+      </div>
+    </PublicShell>
   );
 }

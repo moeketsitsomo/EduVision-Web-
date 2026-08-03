@@ -10,7 +10,7 @@ export function Footer({ site }: { site: SiteData }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
         <div>
           <h3 className="font-bold text-lg mb-2">{school.name}</h3>
-          <p className="opacity-80 text-sm">{school.metaDescription}</p>
+          <p className="opacity-80 text-sm">{school.footerText || school.metaDescription}</p>
         </div>
 
         <div>

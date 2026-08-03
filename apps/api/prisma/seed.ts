@@ -26,9 +26,39 @@ async function main() {
       secondaryColor: '#1e293b',
       contactEmail: 'info@sunrise-primary.edu',
       contactPhone: '+27 12 345 6789',
+      admissionsEmail: 'admissions@sunrise-primary.edu',
+      admissionsPhone: '+27 12 345 6790',
       address: '123 School Lane, Pretoria, South Africa',
       websiteTitle: 'Sunrise Primary School',
       metaDescription: 'Excellence in education for every learner.',
+      footerText: '© Sunrise Primary School. Nurturing lifelong learners.',
+      principalName: 'Mrs Thandi Ndlovu',
+      principalMessage: 'Welcome to Sunrise Primary School. We are committed to academic excellence, strong values, and nurturing every child to reach their full potential.',
+      mission: 'To provide a safe, inclusive and stimulating environment where every learner can thrive academically, socially and emotionally.',
+      vision: 'To be a leading primary school that develops confident, responsible and lifelong learners.',
+      values: 'Respect\nResponsibility\nIntegrity\nExcellence\nCompassion',
+      history: 'Founded in 1994, Sunrise Primary School has grown from a small community school into a centre of excellence serving learners from Grade R to Grade 7.',
+      establishedYear: 1994,
+      enrollmentCount: 420,
+      teacherCount: 28,
+      classroomCount: 18,
+      passRate: 96.5,
+      facilities: [
+        'Modern classrooms with smart boards',
+        'Science and computer laboratories',
+        'Library and resource centre',
+        'Sports fields and netball courts',
+        'Music and art rooms',
+        'Safe aftercare facility',
+      ],
+      awards: [
+        { year: 2024, title: 'Best Primary School in Region' },
+        { year: 2023, title: 'Excellence in Mathematics Award' },
+      ],
+      officeHours: 'Mon – Fri: 07:30 – 15:30\nSat: 08:00 – 12:00',
+      googleMapsUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14380.0!2d28.2186!3d-25.7479!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDQ0JzUyLjQiUyAyOMKwMTMnMDcuMCJF!5e0!3m2!1sen!2sza!4v1600000000000',
+      locationLat: -25.7479,
+      locationLng: 28.2186,
       isActive: true,
       subscriptionStatus: SubscriptionStatus.ACTIVE,
       plan: 'BASIC',
@@ -99,22 +129,22 @@ async function main() {
   }
 
   const pages = [
-    { slug: 'home', title: 'Home', showInMenu: true, menuOrder: 0, content: '# Welcome to Sunrise Primary School\n\nWe are committed to excellence in education and to nurturing every learner to reach their full potential.' },
-    { slug: 'about', title: 'About Us', showInMenu: true, menuOrder: 1, content: '## About Us\n\nSunrise Primary School has been serving the Pretoria community for over 30 years with quality, inclusive education.' },
-    { slug: 'principal-message', title: "Principal's Message", showInMenu: true, menuOrder: 2, content: "## A Message from the Principal\n\nWelcome to our school. We believe in academic excellence, discipline and strong values." },
-    { slug: 'vision-mission', title: 'Vision & Mission', showInMenu: true, menuOrder: 3, content: '## Vision\nTo be a leading primary school that develops confident, responsible and lifelong learners.\n\n## Mission\nTo provide a safe, inclusive and stimulating environment where every learner can thrive.' },
-    { slug: 'history', title: 'School History', showInMenu: true, menuOrder: 4, content: '## Our History\nFounded in 1994, Sunrise Primary School has grown from a small community school into a centre of excellence.' },
-    { slug: 'academics', title: 'Academics', showInMenu: true, menuOrder: 5, content: '## Academics\nWe follow the CAPS curriculum with a strong focus on literacy, numeracy, science and technology.' },
-    { slug: 'admissions', title: 'Admissions', showInMenu: true, menuOrder: 6, content: '## Admissions\nApplications for the 2026 academic year are now open. Visit our online admissions portal to apply.' },
-    { slug: 'school-fees', title: 'School Fees', showInMenu: true, menuOrder: 7, content: '## School Fees\nOur fees are competitive and transparent. Detailed fee structures are available on the School Fees page.' },
-    { slug: 'school-uniform', title: 'School Uniform', showInMenu: true, menuOrder: 8, content: '## School Uniform\nOur uniform is available from approved suppliers. Navy blue and white are our school colours.' },
-    { slug: 'sports', title: 'Sports', showInMenu: true, menuOrder: 9, content: '## Sports\nWe offer soccer, netball, cricket, athletics and chess. All learners are encouraged to participate.' },
-    { slug: 'contact', title: 'Contact Us', showInMenu: true, menuOrder: 10, content: '## Contact Us\nReach us by phone, email or visit the school office during working hours.' },
-    { slug: 'emergency', title: 'Emergency Contacts', showInMenu: true, menuOrder: 11, content: '## Emergency Contacts\nFor emergencies contact the school office or the numbers listed below.' },
-    { slug: 'news', title: 'News', showInMenu: true, menuOrder: 12, content: '## Latest News\nStay updated with events, achievements and announcements.' },
-    { slug: 'events', title: 'Events', showInMenu: true, menuOrder: 13, content: '## Upcoming Events\nView our calendar for sports days, parent meetings and cultural events.' },
-    { slug: 'gallery', title: 'Gallery', showInMenu: true, menuOrder: 14, content: '## Gallery\nA showcase of school life, events and achievements.' },
-    { slug: 'downloads', title: 'Downloads', showInMenu: true, menuOrder: 15, content: '## Downloads\nAccess policies, newsletters, fee schedules and forms.' },
+    { slug: 'home', title: 'Home', showInMenu: true, menuOrder: 0, content: 'We are committed to excellence in education and to nurturing every learner to reach their full potential.' },
+    { slug: 'about', title: 'About Us', showInMenu: false, menuOrder: 1, content: 'Sunrise Primary School has been serving the Pretoria community for over 30 years with quality, inclusive education.' },
+    { slug: 'principal-message', title: "Principal's Message", showInMenu: false, menuOrder: 2, content: 'Welcome to our school. We believe in academic excellence, discipline and strong values.' },
+    { slug: 'vision-mission', title: 'Vision & Mission', showInMenu: false, menuOrder: 3, content: '## Vision\nTo be a leading primary school that develops confident, responsible and lifelong learners.\n\n## Mission\nTo provide a safe, inclusive and stimulating environment where every learner can thrive.' },
+    { slug: 'history', title: 'School History', showInMenu: false, menuOrder: 4, content: 'Founded in 1994, Sunrise Primary School has grown from a small community school into a centre of excellence.' },
+    { slug: 'academics', title: 'Academics', showInMenu: false, menuOrder: 5, content: 'We follow the CAPS curriculum with a strong focus on literacy, numeracy, science and technology.' },
+    { slug: 'admissions', title: 'Admissions', showInMenu: false, menuOrder: 6, content: 'Applications for the 2026 academic year are now open. Visit our online admissions portal to apply.' },
+    { slug: 'school-fees', title: 'School Fees', showInMenu: false, menuOrder: 7, content: 'Our fees are competitive and transparent. Detailed fee structures are available on the School Fees page.' },
+    { slug: 'school-uniform', title: 'School Uniform', showInMenu: false, menuOrder: 8, content: 'Our uniform is available from approved suppliers. Navy blue and white are our school colours.' },
+    { slug: 'sports', title: 'Sports', showInMenu: false, menuOrder: 9, content: 'We offer soccer, netball, cricket, athletics and chess. All learners are encouraged to participate.' },
+    { slug: 'contact', title: 'Contact Us', showInMenu: false, menuOrder: 10, content: 'Reach us by phone, email or visit the school office during working hours.' },
+    { slug: 'emergency', title: 'Emergency Contacts', showInMenu: false, menuOrder: 11, content: 'For emergencies contact the school office or the numbers listed below.' },
+    { slug: 'news', title: 'News', showInMenu: false, menuOrder: 12, content: 'Stay updated with events, achievements and announcements.' },
+    { slug: 'events', title: 'Events', showInMenu: false, menuOrder: 13, content: 'View our calendar for sports days, parent meetings and cultural events.' },
+    { slug: 'gallery', title: 'Gallery', showInMenu: false, menuOrder: 14, content: 'A showcase of school life, events and achievements.' },
+    { slug: 'downloads', title: 'Downloads', showInMenu: false, menuOrder: 15, content: 'Access policies, newsletters, fee schedules and forms.' },
   ];
 
   for (const p of pages) {
@@ -276,6 +306,85 @@ async function main() {
       mediaId: media.id,
     },
   });
+
+  // Sample subjects
+  const subjects = [
+    { name: 'English Home Language', code: 'ENG', grade: 'Grade 4-7', category: 'Languages', description: 'Reading, writing, speaking and listening.' },
+    { name: 'Mathematics', code: 'MATH', grade: 'Grade 4-7', category: 'Mathematics', description: 'Numbers, operations, patterns, geometry and data handling.' },
+    { name: 'Natural Sciences & Technology', code: 'NST', grade: 'Grade 4-7', category: 'Science', description: 'Investigating the natural and technological world.' },
+    { name: 'Social Sciences', code: 'SS', grade: 'Grade 4-7', category: 'Humanities', description: 'History and geography.' },
+    { name: 'Life Skills', code: 'LS', grade: 'Grade 4-7', category: 'Life Skills', description: 'Creative arts, physical education and personal wellbeing.' },
+  ];
+  await prisma.subject.deleteMany({ where: { schoolId: demoSchool.id } });
+  for (const s of subjects) {
+    await prisma.subject.create({ data: { ...s, schoolId: demoSchool.id, order: 0, isPublished: true } });
+  }
+
+  // Sample results for demo students
+  const term = 'Term 2';
+  const year = '2026';
+  for (const student of demoStudents) {
+    await prisma.result.createMany({
+      data: [
+        { schoolId: demoSchool.id, studentId: student.id, studentNumber: student.studentNumber, academicYear: year, term, subject: 'English Home Language', score: 78, maxScore: 100, grade: 'B', isPublished: true, publishedAt: new Date() },
+        { schoolId: demoSchool.id, studentId: student.id, studentNumber: student.studentNumber, academicYear: year, term, subject: 'Mathematics', score: 82, maxScore: 100, grade: 'A', isPublished: true, publishedAt: new Date() },
+        { schoolId: demoSchool.id, studentId: student.id, studentNumber: student.studentNumber, academicYear: year, term, subject: 'Natural Sciences & Technology', score: 74, maxScore: 100, grade: 'B', isPublished: true, publishedAt: new Date() },
+      ],
+    });
+
+    // Sample homework
+    await prisma.homework.create({
+      data: {
+        schoolId: demoSchool.id,
+        studentId: student.id,
+        grade: student.grade,
+        subject: 'Mathematics',
+        title: 'Fractions worksheet',
+        description: 'Complete exercises 1-10 on equivalent fractions.',
+        dueDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
+      },
+    });
+  }
+
+  // Sample parent and learner users
+  const parentPassword = await bcrypt.hash('Parent123!', 10);
+  const learnerPassword = await bcrypt.hash('Learner123!', 10);
+
+  for (const student of demoStudents) {
+    const parentEmail = student.parentEmail || `parent-${student.studentNumber}@example.com`;
+    const existingParent = await prisma.user.findFirst({ where: { email: parentEmail, schoolId: demoSchool.id } });
+    if (!existingParent) {
+      await prisma.user.create({
+        data: {
+          email: parentEmail,
+          passwordHash: parentPassword,
+          firstName: 'Parent',
+          lastName: `of ${student.firstName}`,
+          role: UserRole.PARENT,
+          schoolId: demoSchool.id,
+          studentId: student.id,
+          isActive: true,
+        },
+      });
+    }
+
+    const learnerEmail = `learner-${student.studentNumber}@example.com`;
+    const existingLearner = await prisma.user.findFirst({ where: { email: learnerEmail, schoolId: demoSchool.id } });
+    if (!existingLearner) {
+      await prisma.user.create({
+        data: {
+          email: learnerEmail,
+          passwordHash: learnerPassword,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          role: UserRole.LEARNER,
+          schoolId: demoSchool.id,
+          studentId: student.id,
+          isActive: true,
+        },
+      });
+    }
+  }
 
   console.log('Seed completed with demo data');
 }
