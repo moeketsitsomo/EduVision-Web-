@@ -92,4 +92,21 @@ export class PortalController {
     }
     return this.prisma.attendance.findMany({ where, orderBy: { date: 'desc' } });
   }
+
+  @Get('homework')
+  async homework(@CurrentUser() user: any) {
+    const schoolId = user.schoolId;
+    let where: any = { schoolId, isPublished: true };
+    if (user.role === UserRole.LEARNER || user.role === UserRole.PARENT) {
+      if (user.studentId) {
+        where = { OR: [{ studentId: user.studentId }, { grade: null }, { grade: (user.student as any)?.grade }], ...where };
+      } else if (user.role === UserRole.LEARNER) {
+        return [];
+      }
+    }
+    return this.prisma.homework.findMany({
+      where,
+      orderBy: [{ dueDate: 'asc' }, { assignedAt: 'desc' }],
+    });
+  }
 }

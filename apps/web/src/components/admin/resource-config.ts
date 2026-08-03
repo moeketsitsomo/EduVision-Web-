@@ -17,6 +17,21 @@ export interface ResourceConfig {
 }
 
 export const RESOURCES: Record<string, ResourceConfig> = {
+  subjects: {
+    resource: 'subjects',
+    idKey: 'id',
+    title: 'Subjects',
+    singular: 'Subject',
+    fields: [
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'code', label: 'Code', type: 'text' },
+      { name: 'grade', label: 'Grade', type: 'text' },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      { name: 'category', label: 'Category', type: 'text' },
+      { name: 'order', label: 'Order', type: 'number' },
+      { name: 'isPublished', label: 'Published', type: 'switch' },
+    ],
+  },
   pages: {
     resource: 'pages',
     idKey: 'slug',
@@ -121,6 +136,20 @@ export const RESOURCES: Record<string, ResourceConfig> = {
       { name: 'type', label: 'Type', type: 'text', required: true },
       { name: 'label', label: 'Label', type: 'text' },
       { name: 'order', label: 'Order', type: 'number' },
+    ],
+  },
+  'contact-messages': {
+    resource: 'contact-messages',
+    idKey: 'id',
+    title: 'Contact Requests',
+    singular: 'Contact Request',
+    fields: [
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'email', label: 'Email', type: 'email', required: true },
+      { name: 'phone', label: 'Phone', type: 'text' },
+      { name: 'subject', label: 'Subject', type: 'text', required: true },
+      { name: 'message', label: 'Message', type: 'textarea', required: true },
+      { name: 'isRead', label: 'Read', type: 'switch' },
     ],
   },
   socials: {

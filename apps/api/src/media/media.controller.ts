@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Body,
   Param,
   Query,
   UseGuards,
@@ -27,8 +28,15 @@ export class MediaController {
   findAll(
     @CurrentUser('schoolId') schoolId: string,
     @Query('type') type?: string,
+    @Query('category') category?: string,
   ) {
-    return this.mediaService.findAll(schoolId, type);
+    return this.mediaService.findAll(schoolId, type, category);
+  }
+
+  @Get('categories')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.SCHOOL_STAFF)
+  categories(@CurrentUser('schoolId') schoolId: string) {
+    return this.mediaService.categories(schoolId);
   }
 
   @Post('upload')
@@ -36,10 +44,11 @@ export class MediaController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.SCHOOL_STAFF)
   upload(
     @UploadedFile() file: Express.Multer.File,
+    @Body('category') category: string,
     @CurrentUser('schoolId') schoolId: string,
     @CurrentUser('id') userId: string,
   ) {
-    return this.mediaService.upload(file, schoolId, userId);
+    return this.mediaService.upload(file, schoolId, userId, category);
   }
 
   @Delete(':id')

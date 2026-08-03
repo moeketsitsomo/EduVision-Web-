@@ -26,6 +26,7 @@ import { LibraryModule } from './library/library.module';
 import { FinanceModule } from './finance/finance.module';
 import { CommunicationModule } from './communication/communication.module';
 import { ReportsModule } from './reports/reports.module';
+import { SubjectsModule } from './subjects/subjects.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { LicensesModule } from './licenses/licenses.module';
@@ -45,6 +46,7 @@ import { AllExceptionsFilter } from './logger/all-exceptions.filter';
 import { CacheModule } from './cache/cache.module';
 import { SetupModule } from './setup/setup.module';
 import { LeadsModule } from './leads/leads.module';
+import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 
 const auditProvider: Provider = {
   provide: APP_INTERCEPTOR,
@@ -94,6 +96,7 @@ const subscriptionGuardProvider: Provider = {
     FinanceModule,
     CommunicationModule,
     ReportsModule,
+    SubjectsModule,
     SubscriptionsModule,
     InvoicesModule,
     LicensesModule,
@@ -103,6 +106,7 @@ const subscriptionGuardProvider: Provider = {
     PortalModule,
     SetupModule,
     LeadsModule,
+    ContactMessagesModule,
   ],
   controllers: [HealthController],
   providers: [auditProvider, exceptionFilterProvider, subscriptionGuardProvider, HealthService],

@@ -10,6 +10,7 @@ import {
   Min,
   Max,
   IsEnum,
+  IsNumber,
 } from 'class-validator';
 import { PlanType } from '@prisma/client';
 
@@ -107,4 +108,86 @@ export class CreateSchoolDto {
   @IsInt()
   @Min(0)
   maxUsers?: number;
+
+  @IsOptional()
+  @IsString()
+  bannerImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  admissionsEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  admissionsPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  footerText?: string;
+
+  @IsOptional()
+  @IsString()
+  principalName?: string;
+
+  @IsOptional()
+  @IsString()
+  principalMessage?: string;
+
+  @IsOptional()
+  @IsString()
+  mission?: string;
+
+  @IsOptional()
+  @IsString()
+  vision?: string;
+
+  @IsOptional()
+  @IsString()
+  values?: string;
+
+  @IsOptional()
+  @IsString()
+  history?: string;
+
+  @IsOptional()
+  @IsInt()
+  establishedYear?: number;
+
+  @IsOptional()
+  @IsInt()
+  enrollmentCount?: number;
+
+  @IsOptional()
+  @IsInt()
+  teacherCount?: number;
+
+  @IsOptional()
+  @IsInt()
+  classroomCount?: number;
+
+  @IsOptional()
+  @IsNumber()
+  passRate?: number;
+
+  @IsOptional()
+  facilities?: any;
+
+  @IsOptional()
+  awards?: any;
+
+  @IsOptional()
+  @IsString()
+  officeHours?: string;
+
+  @IsOptional()
+  @IsString()
+  googleMapsUrl?: string;
+
+  @IsOptional()
+  @IsNumber()
+  locationLat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  locationLng?: number;
 }
