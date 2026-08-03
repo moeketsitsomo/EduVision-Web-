@@ -126,6 +126,12 @@ model School {
   licenses            License[]
   students            Student[]
   passwordResetTokens PasswordResetToken[]
+  timetable           TimetableEntry[]
+  books               Book[]
+  borrowings          Borrowing[]
+  financeTransactions FinanceTransaction[]
+  communications      Communication[]
+  reports             Report[]
 
   @@index([slug])
   @@index([customDomain])
@@ -585,4 +591,113 @@ model PasswordResetToken {
   @@index([email, schoolId])
   @@index([tokenHash])
   @@index([expiresAt])
+}
+
+model TimetableEntry {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  className   String
+  subject     String
+  teacherName String
+  dayOfWeek   String
+  startTime   String
+  endTime     String
+  room        String?
+  term        String?
+  year        Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId, dayOfWeek])
+  @@index([schoolId, className, year])
+}
+
+model Book {
+  id              String      @id @default(cuid())
+  schoolId        String
+  school          School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  title           String
+  author          String?
+  isbn            String?
+  category        String?
+  copiesTotal     Int         @default(1)
+  copiesAvailable Int         @default(1)
+  publishedYear   Int?
+  location        String?
+  borrowings      Borrowing[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([schoolId, title])
+  @@index([schoolId, isbn])
+}
+
+model Borrowing {
+  id           String    @id @default(cuid())
+  schoolId     String
+  school       School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  bookId       String
+  book         Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  borrowerType String
+  borrowerName String
+  borrowedAt   DateTime  @default(now())
+  dueDate      DateTime
+  returnedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([schoolId, returnedAt])
+  @@index([bookId])
+}
+
+model FinanceTransaction {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  amount      Decimal
+  type        String
+  category    String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId, date])
+  @@index([schoolId, type])
+}
+
+model Communication {
+  id        String   @id @default(cuid())
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  type      String
+  audience  String
+  subject   String
+  content   String
+  sentAt    DateTime @default(now())
+  status    String   @default("SENT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([schoolId, sentAt])
+  @@index([schoolId, type])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name        String
+  type        String
+  filters     Json?
+  fileUrl     String?
+  status      String   @default("PENDING")
+  generatedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId, type])
+  @@index([schoolId, status])
 }

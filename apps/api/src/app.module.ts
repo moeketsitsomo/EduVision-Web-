@@ -21,6 +21,11 @@ import { NoticesModule } from './notices/notices.module';
 import { AdmissionsModule } from './admissions/admissions.module';
 import { ResultsModule } from './results/results.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { TimetableModule } from './timetable/timetable.module';
+import { LibraryModule } from './library/library.module';
+import { FinanceModule } from './finance/finance.module';
+import { CommunicationModule } from './communication/communication.module';
+import { ReportsModule } from './reports/reports.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { LicensesModule } from './licenses/licenses.module';
@@ -84,6 +89,11 @@ const subscriptionGuardProvider: Provider = {
     AdmissionsModule,
     ResultsModule,
     AttendanceModule,
+    TimetableModule,
+    LibraryModule,
+    FinanceModule,
+    CommunicationModule,
+    ReportsModule,
     SubscriptionsModule,
     InvoicesModule,
     LicensesModule,

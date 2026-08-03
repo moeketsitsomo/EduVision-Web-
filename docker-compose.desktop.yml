@@ -1,0 +1,84 @@
+# Desktop Docker Compose for EduVision School Website.
+# The desktop application writes a default .env file and runs:
+#   docker compose -f docker-compose.desktop.yml -p eduvision-desktop up -d
+name: eduvision-desktop
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eduvision}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eduvision}
+      POSTGRES_DB: ${POSTGRES_DB:-eduvision}
+    volumes:
+      - eduvision_desktop_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-eduvision} -d ${POSTGRES_DB:-eduvision}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - eduvision_desktop_redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  migrations:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eduvision}:${POSTGRES_PASSWORD:-eduvision}@postgres:5432/${POSTGRES_DB:-eduvision}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "cd apps/api && npx prisma migrate deploy"
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: ${API_PORT:-4000}
+      API_URL: http://localhost:${API_PORT:-4000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eduvision}:${POSTGRES_PASSWORD:-eduvision}@postgres:5432/${POSTGRES_DB:-eduvision}?schema=public
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:${API_PORT:-4000}"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: ${WEB_PORT:-3000}
+      API_URL: http://api:${API_PORT:-4000}
+      DISABLE_ADMIN: 'true'
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:${WEB_PORT:-3000}"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  eduvision_desktop_postgres_data:
+  eduvision_desktop_redis_data:

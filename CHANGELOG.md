@@ -2,6 +2,36 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
+## [1.3.1] — Desktop Packaging Fix
+
+### Fixed
+
+- Desktop `.deb` installer now installs into `/opt/EduVision-School-Website/` (no spaces) so the launcher and `.desktop` `Exec` path work correctly.
+- Set `linux.executableName` to `eduvision-desktop` and `.desktop` `Name` to `EduVision School Website` for a clean application menu entry.
+- Rebuilt `.deb`, `.AppImage` and `.exe` installers for v1.3.1.
+
+## [1.3.0] — Desktop Public App
+
+### Added
+
+- New `apps/desktop` Electron shell for the public school website.
+- Auto-start local API (port 4000) and Next.js web server (port 3000).
+- Standalone application window with desktop menu and icon.
+- Ubuntu `.desktop` entry installer (`scripts/desktop-install-ubuntu.sh`).
+- Windows batch starter (`scripts/desktop-start.bat`).
+- `DISABLE_ADMIN` middleware that redirects `/admin`, `/setup`, etc. to `/` when running the public desktop build.
+- Electron `session` default `x-school-slug` header for tenant resolution.
+- `postbuild` step to copy static assets into Next.js standalone output.
+
+### Changed
+
+- `EduVision-Web` continues to contain both the public website and the School CMS; they are logically separated by route and authentication.
+- Added CMS modules for Timetable, Library, Finance, Communication and Reports.
+- Added Prisma models and API endpoints for `TimetableEntry`, `Book`, `Borrowing`, `FinanceTransaction`, `Communication` and `Report`.
+- Added admin resource configuration for new CMS modules with navigation and dashboard cards.
+- Improved desktop app: splash screen, EduVision icon/branding, Docker Compose auto-start for PostgreSQL/Redis/API, and one-click launch.
+- Added Linux `.AppImage` and `.deb` installers plus Windows `.exe` installer.
+
 ## [1.2.0] — Launch Readiness
 
 ### Added

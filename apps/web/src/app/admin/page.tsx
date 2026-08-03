@@ -10,6 +10,7 @@ import {
   FileText,
   Newspaper,
   CalendarDays,
+  Calendar,
   Users,
   Image,
   Download,
@@ -20,6 +21,10 @@ import {
   ChevronRight,
   LayoutDashboard,
   type LucideIcon,
+  BookOpen,
+  Receipt,
+  MessageSquare,
+  BarChart3,
 } from 'lucide-react';
 
 const ICONS: Record<string, LucideIcon> = {
@@ -33,6 +38,12 @@ const ICONS: Record<string, LucideIcon> = {
   contacts: Phone,
   socials: Share2,
   navigation: Compass,
+  timetable: Calendar,
+  library: BookOpen,
+  borrowings: BookOpen,
+  finance: Receipt,
+  communication: MessageSquare,
+  reports: BarChart3,
 };
 
 export default function AdminDashboardPage() {
