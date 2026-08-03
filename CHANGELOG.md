@@ -2,10 +2,22 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
-## [1.4.0] — Professional Public School Website (with Polish Release)
+## [1.4.0] — Professional Public School Website (Production Ready)
 
 ### Added
 
+- New `contact-messages` CMS module with `GET`, `PATCH` (mark read), `POST` and `DELETE` endpoints.
+- Dedicated **Admissions Management** dashboard with status filters (Pending, Approved, Rejected, Waiting List), search, inline status updates, notes and CSV / PDF export.
+- `category` field on `Media` with migration, API filter and media library category selection.
+- Video preview support and category filtering in the **Media Library**.
+- Server-side image compression on upload using `sharp` (max 1920 px, JPEG/PNG/WebP/AVIF).
+- Administrator Manual, School Setup Guide, Parent User Guide, Teacher User Guide and Technical Architecture Guide.
+
+### Changed
+
+- `.env.example` and `.env` now default `STORAGE_BASE_URL` to `http://localhost:4000` for local development with clear production guidance.
+- All `https://localhost` media URLs in the demo database were migrated to `http://localhost:4000/uploads/...` so uploads display correctly.
+- Removed `via.placeholder.com` references and replaced placeholder downloads with real policy/prospectus documents.
 - New public-facing `apps/web` pages: professional home page, about school, academics, admissions, news & events, gallery and contact.
 - Public multi-school branding with configurable primary/secondary colours, logo, banner, footer text, social links and contact information.
 - Large animated hero banner, principal’s welcome message, mission/vision/values, animated school statistics, featured news, upcoming events, school achievements and call-to-action buttons on the home page.

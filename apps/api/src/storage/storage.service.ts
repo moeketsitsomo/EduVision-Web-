@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
 import {
   S3Client,
   PutObjectCommand,
@@ -61,6 +62,11 @@ export class StorageService {
     }
     this.validate(file);
 
+    const optimized = await this.optimizeImage(file.buffer, file.mimetype);
+    const uploadBuffer = optimized?.buffer ?? file.buffer;
+    const mimeType = optimized?.mimeType ?? file.mimetype;
+    const size = uploadBuffer.length;
+
     const ext = path.extname(file.originalname).toLowerCase();
     const safeName = `${uuidv4()}${ext}`;
     const key = `uploads/${schoolId}/${folder}/${safeName}`;
@@ -73,16 +79,16 @@ export class StorageService {
         new PutObjectCommand({
           Bucket: this.bucket,
           Key: key,
-          Body: file.buffer,
-          ContentType: file.mimetype,
-          ContentLength: file.size,
+          Body: uploadBuffer,
+          ContentType: mimeType,
+          ContentLength: size,
         }),
       );
     } else {
       const dir = path.resolve(this.root, schoolId, folder);
       await fs.mkdir(dir, { recursive: true });
       const filePath = path.join(dir, safeName);
-      await fs.writeFile(filePath, file.buffer);
+      await fs.writeFile(filePath, uploadBuffer);
     }
 
     const url = `${this.baseUrl}/${key}`;
@@ -90,9 +96,49 @@ export class StorageService {
       url,
       filename: safeName,
       originalName: file.originalname,
-      mimeType: file.mimetype,
-      size: file.size,
+      mimeType,
+      size,
     };
+  }
+
+  private async optimizeImage(
+    buffer: Buffer,
+    mimeType: string,
+  ): Promise<{ buffer: Buffer; mimeType: string } | null> {
+    if (!mimeType.startsWith('image/')) return null;
+    // Skip vector/animated formats where sharp is not appropriate.
+    if (mimeType.includes('svg') || mimeType.includes('gif') || mimeType.includes('x-icon')) return null;
+
+    try {
+      const transformer = sharp(buffer).resize({
+        width: 1920,
+        height: 1920,
+        fit: 'inside',
+        withoutEnlargement: true,
+      });
+
+      let outputBuffer: Buffer;
+      let outputMime = mimeType;
+      if (mimeType === 'image/png') {
+        outputBuffer = await transformer.png({ quality: 85, compressionLevel: 9 }).toBuffer();
+      } else if (mimeType === 'image/webp') {
+        outputBuffer = await transformer.webp({ quality: 85 }).toBuffer();
+      } else if (mimeType === 'image/avif') {
+        outputBuffer = await transformer.avif({ quality: 70 }).toBuffer();
+      } else {
+        // JPEG and unknown raster formats are normalized to JPEG.
+        outputBuffer = await transformer.jpeg({ quality: 85, progressive: true }).toBuffer();
+        outputMime = 'image/jpeg';
+      }
+
+      // Only replace the file if optimization actually reduced the size.
+      if (outputBuffer.length < buffer.length) {
+        return { buffer: outputBuffer, mimeType: outputMime };
+      }
+    } catch (err) {
+      // Fall back to the original file if sharp cannot process it.
+    }
+    return null;
   }
 
   validate(file: Express.Multer.File): void {

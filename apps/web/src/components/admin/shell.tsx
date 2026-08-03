@@ -37,6 +37,7 @@ import {
   Receipt,
   MessageSquare,
   BarChart3,
+  Mail,
 } from 'lucide-react';
 
 const RESOURCE_ICONS: Record<string, LucideIcon> = {
@@ -49,6 +50,7 @@ const RESOURCE_ICONS: Record<string, LucideIcon> = {
   downloads: Download,
   fees: DollarSign,
   contacts: Phone,
+  'contact-messages': Mail,
   socials: Share2,
   navigation: Compass,
   users: UserCog,

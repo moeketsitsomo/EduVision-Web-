@@ -10,11 +10,23 @@ export class MediaService {
     private readonly storage: StorageService,
   ) {}
 
-  findAll(schoolId: string, type?: string) {
+  findAll(schoolId: string, type?: string, category?: string) {
+    const where: any = { schoolId };
+    if (type) where.type = type as MediaType;
+    if (category) where.category = category;
     return this.prisma.media.findMany({
-      where: { schoolId, ...(type ? { type: type as MediaType } : {}) },
+      where,
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async categories(schoolId: string) {
+    const rows = await this.prisma.media.findMany({
+      where: { schoolId },
+      select: { category: true },
+    });
+    const categories = Array.from(new Set(rows.map((r) => r.category).filter(Boolean)));
+    return categories;
   }
 
   async findById(schoolId: string, id: string) {
@@ -23,7 +35,7 @@ export class MediaService {
     return media;
   }
 
-  async upload(file: Express.Multer.File, schoolId: string, uploadedById: string, folder = 'files') {
+  async upload(file: Express.Multer.File, schoolId: string, uploadedById: string, category?: string, folder = 'files') {
     const folderName = this.folderForType(file.mimetype);
     const stored = await this.storage.save(file, schoolId, folderName);
     const type = this.detectType(file.mimetype);
@@ -31,6 +43,7 @@ export class MediaService {
       data: {
         ...stored,
         type,
+        category,
         schoolId,
         uploadedById,
       },

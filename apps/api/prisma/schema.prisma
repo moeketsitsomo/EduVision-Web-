@@ -375,6 +375,7 @@ model Media {
   size         Int
   url          String
   type         MediaType
+  category     String?
   metadata     Json?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -388,6 +389,7 @@ model Media {
   downloads     Download[]
 
   @@index([schoolId, type])
+  @@index([schoolId, category])
   @@index([uploadedById])
 }
 
