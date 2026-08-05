@@ -1,8 +1,9 @@
 const { app, BrowserWindow, ipcMain, shell, session, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { spawn, execFile } = require('child_process');
+const { spawn } = require('child_process');
 const http = require('http');
+const net = require('net');
 
 let splashWindow;
 let mainWindow;
@@ -10,11 +11,24 @@ let apiProcess;
 let webProcess;
 let dockerStarted = false;
 
-function getRootDir() {
+const COMPOSE_TIMEOUT = 10 * 60 * 1000; // 10 minutes for build/pull
+
+function getInstallRoot() {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, 'root');
   }
   return path.join(__dirname, '..', '..', '..');
+}
+
+function getWorkingRoot() {
+  if (app.isPackaged) {
+    const dir = path.join(app.getPath('userData'), 'eduvision');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
+  }
+  return getInstallRoot();
 }
 
 function updateStatus(message) {
@@ -22,7 +36,7 @@ function updateStatus(message) {
   if (splashWindow && !splashWindow.isDestroyed()) {
     splashWindow.webContents.executeJavaScript(
       `document.getElementById('status').textContent = ${JSON.stringify(message)}`
-    );
+    ).catch(() => {});
   }
 }
 
@@ -30,26 +44,67 @@ function showError(title, message) {
   dialog.showErrorBox(title, message);
 }
 
-function waitForUrl(url, timeout = 120000) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isPortInUse(port, host = '127.0.0.1') {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    let settled = false;
+
+    socket.setTimeout(1000);
+    socket.once('connect', () => {
+      if (!settled) {
+        settled = true;
+        socket.destroy();
+        resolve(true);
+      }
+    });
+    socket.once('timeout', () => {
+      if (!settled) {
+        settled = true;
+        socket.destroy();
+        resolve(false);
+      }
+    });
+    socket.once('error', () => {
+      if (!settled) {
+        settled = true;
+        socket.destroy();
+        resolve(false);
+      }
+    });
+    socket.connect(port, host);
+  });
+}
+
+function waitForUrl(url, timeout = 120000, label = url) {
   const start = Date.now();
+  let lastReason = 'no response';
   return new Promise((resolve, reject) => {
     const tryConnect = () => {
-      const req = http.get(url, { timeout: 2000 }, (res) => {
+      const req = http.get(url, { timeout: 2000, family: 4 }, (res) => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve();
         } else {
-          retry(`status ${res.statusCode}`);
+          lastReason = `HTTP ${res.statusCode}`;
+          retry(lastReason);
         }
       });
-      req.on('error', () => retry('error'));
+      req.on('error', (err) => {
+        lastReason = err.message;
+        retry(lastReason);
+      });
       req.on('timeout', () => {
+        lastReason = 'connection timeout';
         req.destroy();
-        retry('timeout');
+        retry(lastReason);
       });
 
       function retry(reason) {
         if (Date.now() - start > timeout) {
-          reject(new Error(`Timed out waiting for ${url} (${reason})`));
+          reject(new Error(`Timed out waiting for ${label} (${lastReason})`));
         } else {
           setTimeout(tryConnect, 1000);
         }
@@ -59,17 +114,49 @@ function waitForUrl(url, timeout = 120000) {
   });
 }
 
-function runCommand(bin, args, options) {
+function runCommand(bin, args, options = {}) {
+  const { cwd, log = true, timeout, env } = options;
   return new Promise((resolve, reject) => {
-    const proc = spawn(bin, args, { stdio: 'pipe', ...options });
+    const proc = spawn(bin, args, { cwd, env: env ? { ...process.env, ...env } : process.env, stdio: 'pipe' });
     let stdout = '';
     let stderr = '';
-    proc.stdout.on('data', (d) => { stdout += d.toString(); });
-    proc.stderr.on('data', (d) => { stderr += d.toString(); });
-    proc.on('error', (err) => reject(err));
+    let timedOut = false;
+    let timer;
+
+    if (timeout) {
+      timer = setTimeout(() => {
+        timedOut = true;
+        proc.kill('SIGTERM');
+      }, timeout);
+    }
+
+    proc.stdout.on('data', (d) => {
+      const s = d.toString();
+      stdout += s;
+      if (log) {
+        process.stdout.write(`[${bin}] ${s}`);
+      }
+    });
+
+    proc.stderr.on('data', (d) => {
+      const s = d.toString();
+      stderr += s;
+      if (log) {
+        process.stderr.write(`[${bin}] ${s}`);
+      }
+    });
+
+    proc.on('error', (err) => {
+      if (timer) clearTimeout(timer);
+      reject(err);
+    });
+
     proc.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(`${bin} ${args.join(' ')} exited with ${code}: ${stderr || stdout}`));
+      if (timer) clearTimeout(timer);
+      if (timedOut) {
+        reject(new Error(`${bin} ${args.join(' ')} timed out after ${timeout}ms. stdout: ${stdout} stderr: ${stderr}`));
+      } else if (code !== 0) {
+        reject(new Error(`${bin} ${args.join(' ')} exited with code ${code}. stdout: ${stdout} stderr: ${stderr}`));
       } else {
         resolve(stdout);
       }
@@ -77,23 +164,58 @@ function runCommand(bin, args, options) {
   });
 }
 
-function isDockerAvailable() {
+function checkCommand(bin, args, options = {}) {
   return new Promise((resolve) => {
-    const proc = spawn('docker', ['compose', 'version'], { stdio: 'ignore' });
-    proc.on('error', () => resolve(false));
-    proc.on('close', (code) => resolve(code === 0));
+    const proc = spawn(bin, args, { ...options, stdio: 'pipe' });
+    let stdout = '';
+    let stderr = '';
+    proc.stdout.on('data', (d) => { stdout += d.toString(); });
+    proc.stderr.on('data', (d) => { stderr += d.toString(); });
+    proc.on('error', () => resolve({ ok: false, stdout, stderr: 'command not found' }));
+    proc.on('close', (code) => resolve({ ok: code === 0, stdout, stderr }));
   });
+}
+
+async function ensureDocker() {
+  updateStatus('Checking Docker installation...');
+  const dockerVersion = await checkCommand('docker', ['--version']);
+  if (!dockerVersion.ok) {
+    throw new Error('Docker is not installed.\n\nPlease install Docker Engine and Docker Compose v2, then launch EduVision again.\nSee https://docs.docker.com/engine/install/');
+  }
+
+  updateStatus('Checking Docker daemon...');
+  const daemonCheck = await checkCommand('docker', ['info']);
+  if (!daemonCheck.ok) {
+    updateStatus('Docker daemon is not running. Attempting to start it...');
+    const startAttempt = await checkCommand('sudo', ['-n', 'systemctl', 'start', 'docker']);
+    if (!startAttempt.ok) {
+      throw new Error(`Docker is installed but the daemon is not running and could not be started automatically.\n\nPlease start Docker manually:\n  sudo systemctl start docker\n\nOriginal error: ${daemonCheck.stderr || daemonCheck.stdout || 'unknown'}`);
+    }
+    await sleep(3000);
+    const recheck = await checkCommand('docker', ['info']);
+    if (!recheck.ok) {
+      throw new Error('Docker daemon was started but is still not responding. Please check Docker status and try again.');
+    }
+  }
+
+  updateStatus('Checking Docker Compose...');
+  const composeCheck = await checkCommand('docker', ['compose', 'version']);
+  if (!composeCheck.ok) {
+    throw new Error(`Docker is installed but Docker Compose v2 is not available.\n\nPlease install the Docker Compose plugin.\nError: ${composeCheck.stderr || composeCheck.stdout}`);
+  }
 }
 
 function ensureEnvFile(root) {
   const envPath = path.join(root, '.env');
   if (fs.existsSync(envPath)) return;
+  const jwtSecret = [...Array(64)].map(() => Math.random().toString(36)[2]).join('');
+  const totpSecret = [...Array(32)].map(() => Math.random().toString(36)[2]).join('');
   const envContent = `# EduVision Desktop environment
 POSTGRES_USER=eduvision
 POSTGRES_PASSWORD=eduvision
 POSTGRES_DB=eduvision
-DATABASE_URL=postgresql://eduvision:eduvision@localhost:5432/eduvision?schema=public
-REDIS_URL=redis://localhost:6379
+DATABASE_URL=postgresql://eduvision:eduvision@postgres:5432/eduvision?schema=public
+REDIS_URL=redis://redis:6379
 API_PORT=4000
 WEB_PORT=3000
 API_URL=http://localhost:4000
@@ -104,56 +226,153 @@ STORAGE_TYPE=local
 STORAGE_LOCAL_ROOT=uploads
 STORAGE_BASE_URL=http://localhost:4000
 MAX_UPLOAD_SIZE_MB=50
-JWT_SECRET=change-me-to-a-long-random-string
-TOTP_SECRET=change-me-to-a-32-char-secret-for-2fa
+JWT_SECRET=${jwtSecret}
+TOTP_SECRET=${totpSecret}
 EMAIL_FROM=noreply@eduvision.local
 `;
   fs.writeFileSync(envPath, envContent, 'utf8');
 }
 
-async function startDockerServices(root) {
-  const composeFile = path.join(root, 'docker-compose.desktop.yml');
-  if (!fs.existsSync(composeFile)) {
-    throw new Error(`Desktop compose file not found at ${composeFile}`);
+function prepareComposeFile(installRoot, workingRoot) {
+  const composeSource = path.join(installRoot, 'docker-compose.desktop.yml');
+  if (!fs.existsSync(composeSource)) {
+    throw new Error(`Desktop compose file not found at ${composeSource}`);
   }
-  ensureEnvFile(root);
-  updateStatus('Starting PostgreSQL, Redis and backend services...');
-  await runCommand('docker', ['compose', '-f', composeFile, '-p', 'eduvision-desktop', 'up', '-d', '--build'], { cwd: root });
-  dockerStarted = true;
-  updateStatus('Waiting for services to become healthy...');
-  await waitForUrl('http://localhost:4000/health');
-  await waitForUrl('http://localhost:3000/api/health');
+
+  // In development the working root is the repository itself, so we can use
+  // the original compose file. In packaged builds the install root is
+  // read-only and we need a writable copy with an absolute build context.
+  if (workingRoot === installRoot) {
+    return path.basename(composeSource);
+  }
+
+  const composeDest = path.join(workingRoot, 'docker-compose.desktop.yml');
+  let composeContent = fs.readFileSync(composeSource, 'utf8');
+  const safeRoot = installRoot.replace(/\\/g, '/');
+  composeContent = composeContent.replace(/^(\s+)context:\s*\.\s*$/gm, `$1context: "${safeRoot}"`);
+  fs.writeFileSync(composeDest, composeContent, 'utf8');
+  return path.basename(composeDest);
 }
 
-async function stopDockerServices(root) {
-  const composeFile = path.join(root, 'docker-compose.desktop.yml');
+async function waitForComposeService(project, service, command, expected, timeout = 120000) {
+  const start = Date.now();
+  let lastReason = '';
+  while (Date.now() - start < timeout) {
+    try {
+      const output = await runCommand('docker', ['compose', '-p', project, 'exec', '-T', service, ...command], { log: false, timeout: 10000 });
+      if (output.trim().includes(expected)) {
+        return;
+      }
+      lastReason = `service responded but did not contain "${expected}"; got: ${output.trim()}`;
+    } catch (err) {
+      lastReason = err.message;
+    }
+    await sleep(2000);
+  }
+  throw new Error(`Timed out waiting for ${service} (${lastReason})`);
+}
+
+async function startDockerServices() {
+  const project = 'eduvision-desktop';
+  const installRoot = getInstallRoot();
+  const workingRoot = getWorkingRoot();
+
+  await ensureDocker();
+  ensureEnvFile(workingRoot);
+
+  updateStatus('Checking for already-running services...');
+  try {
+    await waitForUrl('http://127.0.0.1:4000/health', 3000, 'API');
+    await waitForUrl('http://127.0.0.1:3000/', 3000, 'Web');
+    updateStatus('Services are already running.');
+    dockerStarted = true;
+    return;
+  } catch {
+    // continue
+  }
+
+  const apiPort = process.env.API_PORT || '4000';
+  const webPort = process.env.WEB_PORT || '3000';
+
+  for (const [port, name] of [[apiPort, 'API'], [webPort, 'Web']]) {
+    const inUse = await isPortInUse(port);
+    if (inUse) {
+      throw new Error(`Port ${port} is already in use.\n\nAnother process is listening on port ${port} but it is not responding as the EduVision ${name} service.\nPlease free port ${port} and try again.`);
+    }
+  }
+
+  let composeFile;
+  try {
+    composeFile = prepareComposeFile(installRoot, workingRoot);
+  } catch (err) {
+    throw new Error(`Failed to prepare Docker Compose file.\n\n${err.message}`);
+  }
+
+  updateStatus('Starting services with Docker Compose (this may take a few minutes)...');
+  try {
+    await runCommand('docker', ['compose', '-f', composeFile, '-p', project, 'up', '-d', '--build'], { cwd: workingRoot, timeout: COMPOSE_TIMEOUT });
+  } catch (err) {
+    throw new Error(`docker compose up failed.\n\n${err.message}`);
+  }
+  dockerStarted = true;
+
+  updateStatus('Waiting for PostgreSQL to become healthy...');
+  await waitForComposeService(project, 'postgres', ['pg_isready', '-U', 'eduvision'], 'accepting connections', 120000);
+
+  updateStatus('Waiting for Redis to become ready...');
+  await waitForComposeService(project, 'redis', ['redis-cli', 'ping'], 'PONG', 120000);
+
+  updateStatus('Waiting for API and database migrations on http://localhost:4000/health...');
+  await waitForUrl('http://127.0.0.1:4000/health', 180000, 'API health (includes migrations)');
+
+  updateStatus('Waiting for Web server on http://localhost:3000...');
+  await waitForUrl('http://127.0.0.1:3000/', 180000, 'Web server');
+}
+
+async function stopDockerServices() {
+  const workingRoot = getWorkingRoot();
+  const composeFile = path.join(workingRoot, 'docker-compose.desktop.yml');
   if (!fs.existsSync(composeFile)) return;
   try {
-    await runCommand('docker', ['compose', '-f', composeFile, '-p', 'eduvision-desktop', 'down'], { cwd: root });
+    await runCommand('docker', ['compose', '-f', path.basename(composeFile), '-p', 'eduvision-desktop', 'down'], { cwd: workingRoot, log: false });
   } catch (err) {
     console.error('[Desktop] Failed to stop Docker services:', err.message);
   }
 }
 
-function startNodeServices() {
-  const root = getRootDir();
+function nodeServicePath(type) {
+  const installRoot = getInstallRoot();
+  if (type === 'api') {
+    return app.isPackaged
+      ? path.join(process.resourcesPath, 'api', 'dist', 'src', 'main.js')
+      : path.join(installRoot, 'apps', 'api', 'dist', 'src', 'main.js');
+  }
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'web', 'apps', 'web', 'server.js')
+    : path.join(installRoot, 'apps', 'web', '.next', 'standalone', 'apps', 'web', 'server.js');
+}
+
+async function startNodeServices() {
+  const installRoot = getInstallRoot();
   const apiPort = process.env.API_PORT || '4000';
   const webPort = process.env.WEB_PORT || '3000';
   const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
 
+  if (app.isPackaged) {
+    const apiScript = nodeServicePath('api');
+    const webScript = nodeServicePath('web');
+    if (!fs.existsSync(apiScript) || !fs.existsSync(webScript)) {
+      throw new Error('The packaged app cannot start the backend directly.\n\nDocker is required to run EduVision. Please install Docker, start the daemon, and launch the app again.');
+    }
+  }
+
   updateStatus('Starting local API server...');
 
-  const apiScript = app.isPackaged
-    ? path.join(process.resourcesPath, 'api', 'dist', 'src', 'main.js')
-    : path.join(root, 'apps', 'api', 'dist', 'src', 'main.js');
+  const apiScript = nodeServicePath('api');
+  const webScript = nodeServicePath('web');
 
-  const webScript = app.isPackaged
-    ? path.join(process.resourcesPath, 'web', 'apps', 'web', 'server.js')
-    : path.join(root, 'apps', 'web', '.next', 'standalone', 'apps', 'web', 'server.js');
-
-  const apiCwd = app.isPackaged ? path.dirname(apiScript) : root;
-  const webCwd = app.isPackaged ? path.dirname(webScript) : root;
-
+  const apiCwd = app.isPackaged ? path.dirname(apiScript) : installRoot;
+  const webCwd = app.isPackaged ? path.dirname(webScript) : installRoot;
   const nodeBin = app.isPackaged ? process.execPath : 'node';
 
   apiProcess = spawn(nodeBin, [apiScript], {
@@ -163,7 +382,7 @@ function startNodeServices() {
       NODE_ENV: 'production',
       ...(app.isPackaged ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
       PORT: apiPort,
-      API_URL: `http://localhost:${apiPort}`,
+      API_URL: `http://127.0.0.1:${apiPort}`,
     },
     stdio: 'pipe',
   });
@@ -179,7 +398,7 @@ function startNodeServices() {
       NODE_ENV: 'production',
       ...(app.isPackaged ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
       PORT: webPort,
-      API_URL: `http://localhost:${apiPort}`,
+      API_URL: `http://127.0.0.1:${apiPort}`,
       DISABLE_ADMIN: 'true',
     },
     stdio: 'pipe',
@@ -189,41 +408,34 @@ function startNodeServices() {
   webProcess.stdout.on('data', (d) => process.stdout.write(`[Web] ${d.toString()}`));
   webProcess.stderr.on('data', (d) => process.stderr.write(`[Web] ${d.toString()}`));
 
-  return waitForUrl(`http://localhost:${apiPort}/health`)
-    .then(() => waitForUrl(`http://localhost:${webPort}/api/health`));
+  await waitForUrl(`http://127.0.0.1:${apiPort}/health`, 120000, 'API health');
+  await waitForUrl(`http://127.0.0.1:${webPort}/`, 120000, 'Web server');
 }
 
 async function startServices() {
-  const root = getRootDir();
   const apiPort = process.env.API_PORT || '4000';
   const webPort = process.env.WEB_PORT || '3000';
 
-  // If services are already running, skip starting.
   try {
-    await waitForUrl(`http://localhost:${apiPort}/health`, 3000);
-    await waitForUrl(`http://localhost:${webPort}/api/health`, 3000);
+    await waitForUrl(`http://127.0.0.1:${apiPort}/health`, 3000, 'API');
+    await waitForUrl(`http://127.0.0.1:${webPort}/`, 3000, 'Web');
     updateStatus('Services are already running.');
     return;
   } catch {
     // continue
   }
 
-  const docker = await isDockerAvailable();
-  if (docker) {
-    try {
-      await startDockerServices(root);
-      return;
-    } catch (err) {
-      console.error('[Desktop] Docker start failed:', err.message);
-      updateStatus('Docker start failed, falling back to local Node services...');
+  try {
+    await startDockerServices();
+    return;
+  } catch (err) {
+    console.error('[Desktop] Docker services failed:', err);
+    if (app.isPackaged) {
+      throw new Error(`Docker services could not be started.\n\n${err.message}`);
     }
+    updateStatus('Docker not available, falling back to local Node services...');
+    await startNodeServices();
   }
-
-  if (!docker && app.isPackaged) {
-    throw new Error('Docker is not available. Please install Docker and Docker Compose, then launch EduVision again.');
-  }
-
-  await startNodeServices();
 }
 
 function createSplashWindow() {
@@ -279,13 +491,13 @@ function createMainWindow() {
     console.error('[Desktop] Failed to load:', errorCode, errorDescription);
   });
 
-  const filter = { urls: [`http://localhost:${webPort}/*`, `http://127.0.0.1:${webPort}/*`] };
+  const filter = { urls: [`http://127.0.0.1:${webPort}/*`, `http://localhost:${webPort}/*`] };
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
     details.requestHeaders['x-school-slug'] = schoolSlug;
     callback({ requestHeaders: details.requestHeaders });
   });
 
-  mainWindow.loadURL(`http://localhost:${webPort}`);
+  mainWindow.loadURL(`http://127.0.0.1:${webPort}`);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
@@ -333,7 +545,7 @@ app.on('window-all-closed', async () => {
   if (apiProcess) apiProcess.kill();
   if (webProcess) webProcess.kill();
   if (dockerStarted) {
-    await stopDockerServices(getRootDir());
+    await stopDockerServices();
   }
   if (process.platform !== 'darwin') app.quit();
 });
@@ -346,6 +558,6 @@ app.on('will-quit', async () => {
   if (apiProcess) apiProcess.kill();
   if (webProcess) webProcess.kill();
   if (dockerStarted) {
-    await stopDockerServices(getRootDir());
+    await stopDockerServices();
   }
 });

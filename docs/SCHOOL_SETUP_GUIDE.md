@@ -13,7 +13,7 @@ This guide walks a new school through initial setup from a fresh EduVision insta
 - Nginx with SSL is configured automatically.
 
 ### Option B: Desktop application (Windows / Ubuntu)
-- Download `EduVision-School-Website-v1.4.0-Production.zip`.
+- Download `EduVision-School-Website-v1.4.1-Production.zip`.
 - Install the `.deb`, `.AppImage` or `.exe`.
 - Launch **EduVision School Website** from the applications menu or desktop.
 - The app auto-starts PostgreSQL, Redis, API and web services via Docker.

@@ -2,6 +2,18 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
+## [1.4.1] — Desktop Startup Reliability
+
+### Fixed
+
+- Desktop app now reliably detects Docker installation, Docker daemon state and Docker Compose availability before attempting startup.
+- Desktop startup waits explicitly for PostgreSQL, Redis, API health (`http://localhost:4000/health`) and web server (`http://localhost:3000`) before opening the main window.
+- Improved error reporting with clear messages for: Docker not installed, Docker daemon not running, Docker Compose missing, port conflicts, `docker compose up` failures, PostgreSQL/Redis/API/web startup failures and timeout reasons.
+- Desktop `main.js` now captures and logs stdout/stderr from Docker Compose and surfaces the actual failure cause to the user.
+- Removed broken Node-services fallback in packaged builds; Docker is required and reported clearly when unavailable.
+- Health checks use `127.0.0.1` explicitly to avoid IPv6 resolution issues.
+- Removed unused `electron-is-dev` dependency from the desktop package.
+
 ## [1.4.0] — Professional Public School Website (Production Ready)
 
 ### Added
