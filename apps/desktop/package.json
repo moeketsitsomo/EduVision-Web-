@@ -14,16 +14,17 @@
     "build:desktop": "electron-builder",
     "build:dir": "electron-builder --dir"
   },
-  "dependencies": {
-    "electron-is-dev": "^3.0.1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "electron": "^41.7.1",
+    "electron": "41.7.1",
     "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "com.eduvision.desktop",
     "productName": "EduVision-School-Website",
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "asar": true,
     "directories": {
       "output": "dist"
     },
