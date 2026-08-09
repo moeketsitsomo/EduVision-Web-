@@ -2,6 +2,16 @@
 
 All notable changes to the EduVision School Website Platform are documented in this file.
 
+## [1.4.2] — Docker Build Timeout and Logging
+
+### Fixed
+
+- Increased first-run Docker Compose build timeout from 10 to 30 minutes so slow/clean machines no longer time out.
+- Split `docker compose up --build` into separate `docker compose build` (with `--progress=plain`) and `docker compose up -d` steps for clearer failure diagnosis.
+- Desktop app now writes the complete `stdout` and `stderr` from Docker Compose to `~/.config/eduvision-desktop/eduvision/logs/docker-compose.log`.
+- Improved error messages so they surface the real failure and point to the full log file path instead of dumping megabytes of build output into the dialog.
+- `runCommand` now reports `stderr` first and truncates large `stdout` tails while keeping the full log on disk.
+
 ## [1.4.1] — Desktop Startup Reliability
 
 ### Fixed
