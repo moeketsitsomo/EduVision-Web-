@@ -36,7 +36,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "cd apps/api && npx prisma migrate deploy"
+    command: sh -c "cd apps/api && npx prisma migrate deploy && npx tsx prisma/seed.ts"
     restart: "no"
 
   api:
