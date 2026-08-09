@@ -79,6 +79,59 @@ function isPortInUse(port, host = '127.0.0.1') {
   });
 }
 
+function waitForPublicSite(apiPort, schoolSlug, timeout = 120000) {
+  const url = `http://127.0.0.1:${apiPort}/public/site`;
+  const start = Date.now();
+  let lastReason = 'no response';
+  return new Promise((resolve, reject) => {
+    const tryConnect = () => {
+      const req = http.get(
+        url,
+        { timeout: 2000, family: 4, headers: { 'x-school-slug': schoolSlug } },
+        (res) => {
+          let body = '';
+          res.on('data', (chunk) => { body += chunk; });
+          res.on('end', () => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              try {
+                const data = JSON.parse(body);
+                if (data.school && data.school.id) {
+                  resolve();
+                  return;
+                }
+                lastReason = 'API did not return a valid school';
+              } catch {
+                lastReason = 'Invalid JSON from API';
+              }
+            } else {
+              lastReason = `HTTP ${res.statusCode}`;
+            }
+            retry(lastReason);
+          });
+        },
+      );
+      req.on('error', (err) => {
+        lastReason = err.message;
+        retry(lastReason);
+      });
+      req.on('timeout', () => {
+        lastReason = 'connection timeout';
+        req.destroy();
+        retry(lastReason);
+      });
+
+      function retry(reason) {
+        if (Date.now() - start > timeout) {
+          reject(new Error(`Timed out waiting for public site (${lastReason})`));
+        } else {
+          setTimeout(tryConnect, 1000);
+        }
+      }
+    };
+    tryConnect();
+  });
+}
+
 function waitForUrl(url, timeout = 120000, label = url) {
   const start = Date.now();
   let lastReason = 'no response';
@@ -318,8 +371,10 @@ async function startDockerServices() {
   ensureEnvFile(workingRoot);
 
   updateStatus('Checking for already-running services...');
+  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
   try {
     await waitForUrl('http://127.0.0.1:4000/health', 3000, 'API');
+    await waitForPublicSite('4000', schoolSlug, 3000);
     await waitForUrl('http://127.0.0.1:3000/', 3000, 'Web');
     updateStatus('Services are already running.');
     dockerStarted = true;
@@ -370,6 +425,10 @@ async function startDockerServices() {
 
   updateStatus('Waiting for API and database migrations on http://localhost:4000/health...');
   await waitForUrl('http://127.0.0.1:4000/health', 180000, 'API health (includes migrations)');
+
+  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
+  updateStatus(`Waiting for school data (slug: ${schoolSlug})...`);
+  await waitForPublicSite('4000', schoolSlug, 180000);
 
   updateStatus('Waiting for Web server on http://localhost:3000...');
   await waitForUrl('http://127.0.0.1:3000/', 180000, 'Web server');
@@ -454,7 +513,9 @@ async function startNodeServices() {
   webProcess.stdout.on('data', (d) => process.stdout.write(`[Web] ${d.toString()}`));
   webProcess.stderr.on('data', (d) => process.stderr.write(`[Web] ${d.toString()}`));
 
+  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
   await waitForUrl(`http://127.0.0.1:${apiPort}/health`, 120000, 'API health');
+  await waitForPublicSite(apiPort, schoolSlug, 120000);
   await waitForUrl(`http://127.0.0.1:${webPort}/`, 120000, 'Web server');
 }
 
@@ -462,8 +523,10 @@ async function startServices() {
   const apiPort = process.env.API_PORT || '4000';
   const webPort = process.env.WEB_PORT || '3000';
 
+  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
   try {
     await waitForUrl(`http://127.0.0.1:${apiPort}/health`, 3000, 'API');
+    await waitForPublicSite(apiPort, schoolSlug, 3000);
     await waitForUrl(`http://127.0.0.1:${webPort}/`, 3000, 'Web');
     updateStatus('Services are already running.');
     return;
