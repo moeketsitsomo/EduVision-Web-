@@ -503,7 +503,6 @@ async function startNodeServices() {
       ...(app.isPackaged ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
       PORT: webPort,
       API_URL: `http://127.0.0.1:${apiPort}`,
-      DISABLE_ADMIN: 'true',
     },
     stdio: 'pipe',
   });
