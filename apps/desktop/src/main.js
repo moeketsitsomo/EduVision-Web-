@@ -426,7 +426,6 @@ async function startDockerServices() {
   updateStatus('Waiting for API and database migrations on http://localhost:4000/health...');
   await waitForUrl('http://127.0.0.1:4000/health', 180000, 'API health (includes migrations)');
 
-  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
   updateStatus(`Waiting for school data (slug: ${schoolSlug})...`);
   await waitForPublicSite('4000', schoolSlug, 180000);
 
