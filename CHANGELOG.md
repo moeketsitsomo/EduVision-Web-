@@ -1,6 +1,20 @@
 # Changelog
 
-All notable changes to the EduVision School Website Platform are documented in this file.
+All notable changes to the EduVision School Website + Admin Dashboard are documented in this file.
+
+## [1.5.0] — Public School Website + No-Code Admin Dashboard
+
+### Added
+
+- New `School` content fields for homepage hero, welcome message, academics, admissions, departments, policies and Open Graph image.
+- No-code School Website Builder in `/admin/settings` with sections for branding, logo/favicon/banner, home page, about, academics, admissions, contact, statistics, facilities/departments/awards and policies.
+- Public pages now read `heroTitle`, `heroDescription`, `heroCtaText`, `heroCtaLink`, `welcomeTitle`, `welcomeMessage`, `academicsInfo`, `curriculumInfo`, `timetableInfo`, `admissionInfo`, `admissionRequirements`, `admissionDocuments`, `admissionImportantDates`, `admissionFeeInfo`, `departments`, `policiesInfo` and `ogImageUrl` directly from the `School` record.
+
+### Changed
+
+- Product scope refocused on a professional public school website with a simple no-code admin dashboard. Full ERP/CMS modules (students, results, attendance, timetable, library, borrowings, finance, fees, subscriptions, invoices, licences and full reports) are hidden from the school admin UI.
+- Admin sidebar and dashboard now only show public-website resources: Subjects, Pages, News, Events, Staff, Galleries, Documents, Contacts, Contact Requests, Social Links, Navigation, Users and Admissions.
+- Removed `SubscriptionGuard` and `AuditInterceptor` providers so school websites are not blocked by subscription or audit state.
 
 ## [1.4.2] — Docker Build Timeout and Logging
 

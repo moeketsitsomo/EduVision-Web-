@@ -6,27 +6,43 @@ import { PageHeader } from '@/components/public/page-header';
 import { AdmissionsForm } from '@/components/public/admissions-form';
 import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, FileText, DollarSign, CheckCircle2, Mail, MapPin, Clock } from 'lucide-react';
+import { Phone, FileText, DollarSign, CheckCircle2, Mail, MapPin, Clock, Calendar } from 'lucide-react';
 
 export async function generateMetadata(): Promise<Metadata> {
   return schoolMetadata('Admissions', 'Apply online, view requirements, fees and admissions contact details.');
 }
 
+function asList(value: unknown): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.map((v) => (typeof v === 'string' ? v : v.name || v.title || v.date || JSON.stringify(v)));
+  }
+  if (typeof value === 'string') {
+    return value.split('\n').map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 export default async function AdmissionsPage() {
   const [site, page] = await Promise.all([fetchSite(), fetchPage('admissions').catch(() => null)]);
-  const { school, fees } = site;
+  const { school } = site;
 
   const admissionsEmail = school.admissionsEmail || school.contactEmail;
   const admissionsPhone = school.admissionsPhone || school.contactPhone;
 
-  const requirements = [
-    'Completed online application form',
-    'Birth certificate or passport copy',
-    'Previous school report card',
-    'Immunisation record',
-    'Proof of residence',
-    'Parent/guardian ID copy',
-  ];
+  const requirements = asList(school.admissionRequirements).length > 0
+    ? asList(school.admissionRequirements)
+    : [
+        'Completed online application form',
+        'Birth certificate or passport copy',
+        'Previous school report card',
+        'Immunisation record',
+        'Proof of residence',
+        'Parent/guardian ID copy',
+      ];
+
+  const documents = asList(school.admissionDocuments);
+  const importantDates = asList(school.admissionImportantDates);
 
   return (
     <PublicShell site={site}>
@@ -36,9 +52,10 @@ export default async function AdmissionsPage() {
         <div className="grid lg:grid-cols-3 gap-10">
           {/* Application form */}
           <div className="lg:col-span-2 space-y-10">
-            {page && (
+            {(page || school.admissionInfo) && (
               <section className="prose dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
-                <MarkdownRenderer content={page.content} />
+                {page && <MarkdownRenderer content={page.content} />}
+                {school.admissionInfo && !page && <MarkdownRenderer content={school.admissionInfo} />}
               </section>
             )}
 
@@ -66,20 +83,49 @@ export default async function AdmissionsPage() {
               </CardContent>
             </Card>
 
+            {documents.length > 0 && (
+              <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg"><FileText className="size-5 text-[var(--school-primary)]" /> Required Documents</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {documents.map((doc, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm">
+                        <FileText className="size-4 mt-0.5 text-[var(--school-primary)]" />
+                        {doc}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {importantDates.length > 0 && (
+              <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg"><Calendar className="size-5 text-[var(--school-primary)]" /> Important Dates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {importantDates.map((date, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm">
+                        <Calendar className="size-4 mt-0.5 text-[var(--school-primary)]" />
+                        {date}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="hover:shadow-lg transition-all hover:-translate-y-1">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg"><DollarSign className="size-5 text-[var(--school-primary)]" /> School Fees</CardTitle>
               </CardHeader>
               <CardContent>
-                {fees.length > 0 ? (
-                  <ul className="space-y-3">
-                    {fees.map((fee) => (
-                      <li key={fee.id} className="flex justify-between text-sm border-b pb-2">
-                        <span>{fee.grade} — {fee.item}</span>
-                        <span className="font-semibold">R {Number(fee.amount).toFixed(2)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {school.admissionFeeInfo ? (
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">{school.admissionFeeInfo}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground">Fee information will be published soon.</p>
                 )}

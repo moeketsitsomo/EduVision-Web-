@@ -110,6 +110,23 @@ model School {
   facilities          Json?
   awards              Json?
   officeHours         String?
+  heroTitle           String?
+  heroDescription     String?
+  heroCtaText         String?
+  heroCtaLink         String?
+  welcomeTitle        String?
+  welcomeMessage      String?
+  departments         Json?
+  academicsInfo       String?
+  curriculumInfo      Json?
+  timetableInfo       String?
+  admissionInfo       String?
+  admissionRequirements Json?
+  admissionDocuments  Json?
+  admissionImportantDates Json?
+  admissionFeeInfo    String?
+  policiesInfo        String?
+  ogImageUrl          String?
   googleMapsUrl       String?
   locationLat         Float?
   locationLng         Float?

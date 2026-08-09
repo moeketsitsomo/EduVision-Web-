@@ -8,7 +8,11 @@ export async function schoolMetadata(title: string, description?: string | null)
     return {
       title: full,
       description: description || site.school.metaDescription || site.school.name,
-      openGraph: { title: full, description: description || site.school.metaDescription || '' },
+      openGraph: {
+        title: full,
+        description: description || site.school.metaDescription || '',
+        images: site.school.ogImageUrl ? [{ url: site.school.ogImageUrl }] : undefined,
+      },
     };
   } catch {
     return { title: `${title} | EduVision School Platform` };

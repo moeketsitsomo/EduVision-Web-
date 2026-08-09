@@ -1,10 +1,10 @@
-# EduVision School Website Platform
+# EduVision School Website + Admin Dashboard
 
-A production-ready, multi-tenant School Website Content Management System. Every school gets its own public website, secure admin dashboard, branding, and isolated data. A super admin dashboard provisions new schools and their admin accounts automatically.
+A production-ready, multi-tenant school public website and no-code administration dashboard. Every school gets its own professional public website, branding, content, and isolated data. The school administrator can manage the entire public website from a simple graphical dashboard without writing code.
 
 Built for commercial deployment: VPS, dedicated server, or any cloud provider. See `DEPLOYMENT.md` and `docs/deployment/` for Ubuntu, DigitalOcean, Hetzner, AWS and Azure guides.
 
-**Latest release: v1.3.0 (desktop-public branch)** — the public school website is now packaged as a standalone desktop application using Electron. It launches from a desktop icon, starts its own local API and web server, and opens in its own window. `EduVision-Web` continues to contain both the public website and the School CMS; the desktop build disables CMS routes so the app is a public-only launcher. See `RELEASE_NOTES_v1.3.0.md` and `CHANGELOG.md`.
+**Latest release: v1.5.0** — the product is now focused as a professional public school website with a no-code school admin dashboard. Multi-tenant school branding, content management, and public website generation are included. A super admin dashboard provisions new schools and admin accounts. See `RELEASE_NOTES_v1.5.0.md` and `CHANGELOG.md`.
 
 ## Desktop Application
 
@@ -46,14 +46,15 @@ Use `scripts/desktop-start.bat` from a command prompt after installing Node.js a
 
 ## Features
 
-- Public school website with dynamic CMS pages: Home, About, Principal's Message, Vision & Mission, History, Staff, Academics, Admissions, School Fees, Uniform, Sports, Gallery, News, Events, Downloads, Contact, Emergency Contacts, Social Media.
-- Secure admin dashboard with full CRUD for pages, posts, events, staff, galleries, downloads, fees, contacts, social links, navigation, users, students, notices, admissions, results, attendance, subscriptions, invoices and licenses.
+- Public school website: Home, About, Principal's Message, Vision & Mission, History, Academics, Admissions, Gallery, News, Events, Staff, Facilities, Awards, Policies, Prospectus, Documents, Contact and social media.
+- No-code school admin dashboard for school name, logo, colours, hero banner, homepage, about, academics, admissions, news, events, gallery, staff, departments, facilities, awards, policies, prospectus, documents, contact details, social links, navigation and SEO.
+- Multi-tenant: every school has its own isolated branding, content, staff, news, events, gallery and settings.
 - Media library for logos, photos, videos, PDFs, newsletters, and policies with local or S3-compatible storage.
-- School branding: colors, logo, favicon, dark mode, custom domain support.
-- Super admin dashboard with platform statistics, subscriptions, licences, invoices, audit logs, one-click school creation, system health, storage and backup reporting.
-- Parent, Teacher and Learner portals with notices, calendar, results and attendance.
-- Subscription, billing, trial and licence management with expired-account enforcement.
-- Two-factor authentication (TOTP) and password-reset via email.
+- School branding: colors, logo, favicon, banner, Open Graph image, dark mode, custom domain support.
+- Super admin dashboard for platform health and school provisioning.
+- Desktop application (.deb, AppImage, .exe) with automatic Docker Compose startup.
+- SEO, responsive design, Google Maps integration and contact/admissions forms.
+- Password-protected admin dashboard with password reset via email.
 - Redis-backed caching for public endpoints.
 - Automated daily database backups, production error logging and health monitoring.
 - Multi-tenant isolation: each school has its own data, users, branding, and domain.

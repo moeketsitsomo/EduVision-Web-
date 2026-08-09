@@ -12,12 +12,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, GraduationCap } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import type { Page } from '@/lib/types';
 
 const HARDCODED_SLUGS = new Set([
-  'home', 'about', 'academics', 'admissions', 'news', 'events', 'gallery', 'contact', 'portal',
-  'downloads', 'calendar', 'notices', 'principal-message', 'vision-mission', 'history',
+  'home', 'about', 'academics', 'admissions', 'news', 'events', 'gallery', 'contact',   'downloads', 'calendar', 'notices', 'principal-message', 'vision-mission', 'history',
   'school-fees', 'school-uniform', 'sports', 'emergency', 'departments', 'staff', 'policies',
   'prospectus', 'media',
 ]);
@@ -90,14 +89,6 @@ export function PublicNav({ pages }: { pages: Page[] }) {
         {menuPages.map((page) => (
           <NavLink key={page.id} href={`/${page.slug}`}>{page.title}</NavLink>
         ))}
-        <Link
-          href="/portal"
-          className={`text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/30 ${
-            isActive('/portal') ? 'bg-white text-[var(--school-primary)]' : 'text-white hover:bg-white/10'
-          }`}
-        >
-          <GraduationCap className="size-4" /> Portal
-        </Link>
         <ThemeToggle />
       </nav>
 
@@ -114,9 +105,6 @@ export function PublicNav({ pages }: { pages: Page[] }) {
           <nav className="flex flex-col gap-1 mt-6">
             {coreLinks.map((link) => mobileLink(link.href, link.label))}
             {menuPages.map((page) => mobileLink(`/${page.slug}`, page.title))}
-            <Link href="/portal" onClick={() => setOpen(false)} className="px-3 py-2 rounded-md font-semibold text-[var(--school-primary)] hover:bg-muted">
-              Portal
-            </Link>
             <div className="px-3 py-2">
               <ThemeToggle />
             </div>

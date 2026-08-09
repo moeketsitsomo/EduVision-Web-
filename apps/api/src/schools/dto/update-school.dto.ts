@@ -172,4 +172,67 @@ export class UpdateSchoolDto {
   @IsOptional()
   @IsNumber()
   locationLng?: number;
+
+  @IsOptional()
+  @IsString()
+  heroTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  heroDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  heroCtaText?: string;
+
+  @IsOptional()
+  @IsString()
+  heroCtaLink?: string;
+
+  @IsOptional()
+  @IsString()
+  welcomeTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  welcomeMessage?: string;
+
+  @IsOptional()
+  departments?: any;
+
+  @IsOptional()
+  @IsString()
+  academicsInfo?: string;
+
+  @IsOptional()
+  curriculumInfo?: any;
+
+  @IsOptional()
+  @IsString()
+  timetableInfo?: string;
+
+  @IsOptional()
+  @IsString()
+  admissionInfo?: string;
+
+  @IsOptional()
+  admissionRequirements?: any;
+
+  @IsOptional()
+  admissionDocuments?: any;
+
+  @IsOptional()
+  admissionImportantDates?: any;
+
+  @IsOptional()
+  @IsString()
+  admissionFeeInfo?: string;
+
+  @IsOptional()
+  @IsString()
+  policiesInfo?: string;
+
+  @IsOptional()
+  @IsString()
+  ogImageUrl?: string;
 }

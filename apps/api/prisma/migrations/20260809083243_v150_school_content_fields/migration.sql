@@ -1,0 +1,18 @@
+-- AlterTable
+ALTER TABLE "School" ADD COLUMN     "academicsInfo" TEXT,
+ADD COLUMN     "admissionDocuments" JSONB,
+ADD COLUMN     "admissionFeeInfo" TEXT,
+ADD COLUMN     "admissionImportantDates" JSONB,
+ADD COLUMN     "admissionInfo" TEXT,
+ADD COLUMN     "admissionRequirements" JSONB,
+ADD COLUMN     "curriculumInfo" JSONB,
+ADD COLUMN     "departments" JSONB,
+ADD COLUMN     "heroCtaLink" TEXT,
+ADD COLUMN     "heroCtaText" TEXT,
+ADD COLUMN     "heroDescription" TEXT,
+ADD COLUMN     "heroTitle" TEXT,
+ADD COLUMN     "ogImageUrl" TEXT,
+ADD COLUMN     "policiesInfo" TEXT,
+ADD COLUMN     "timetableInfo" TEXT,
+ADD COLUMN     "welcomeMessage" TEXT,
+ADD COLUMN     "welcomeTitle" TEXT;

@@ -13,6 +13,7 @@ node_modules
 apps/*/dist
 apps/*/.next
 apps/*/out
+release
 
 # Logs
 *.log
