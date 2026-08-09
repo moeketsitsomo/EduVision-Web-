@@ -11,7 +11,7 @@ let apiProcess;
 let webProcess;
 let dockerStarted = false;
 
-const COMPOSE_TIMEOUT = 10 * 60 * 1000; // 10 minutes for build/pull
+const COMPOSE_TIMEOUT = 30 * 60 * 1000; // 30 minutes for first-run build/pull
 
 function getInstallRoot() {
   if (app.isPackaged) {
@@ -115,13 +115,36 @@ function waitForUrl(url, timeout = 120000, label = url) {
 }
 
 function runCommand(bin, args, options = {}) {
-  const { cwd, log = true, timeout, env } = options;
+  const { cwd, log = true, timeout, env, logToFile, onOutput } = options;
   return new Promise((resolve, reject) => {
     const proc = spawn(bin, args, { cwd, env: env ? { ...process.env, ...env } : process.env, stdio: 'pipe' });
     let stdout = '';
     let stderr = '';
     let timedOut = false;
     let timer;
+    let logStream;
+
+    if (logToFile) {
+      try {
+        const logDir = path.dirname(logToFile);
+        if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+        logStream = fs.createWriteStream(logToFile, { flags: 'a' });
+      } catch (err) {
+        console.error('[Desktop] Failed to open log file:', err);
+      }
+    }
+
+    function appendLog(s) {
+      if (logStream && !logStream.destroyed) logStream.write(s);
+    }
+
+    function handleOutput(s) {
+      const lines = s.split(/\r?\n/).filter(Boolean);
+      if (lines.length && onOutput) {
+        const clean = lines[lines.length - 1].replace(/\x1b\[[0-9;]*m/g, '').trim();
+        if (clean) onOutput(clean);
+      }
+    }
 
     if (timeout) {
       timer = setTimeout(() => {
@@ -133,30 +156,44 @@ function runCommand(bin, args, options = {}) {
     proc.stdout.on('data', (d) => {
       const s = d.toString();
       stdout += s;
-      if (log) {
-        process.stdout.write(`[${bin}] ${s}`);
-      }
+      appendLog(s);
+      if (log) process.stdout.write(`[${bin}] ${s}`);
+      handleOutput(s);
     });
 
     proc.stderr.on('data', (d) => {
       const s = d.toString();
       stderr += s;
-      if (log) {
-        process.stderr.write(`[${bin}] ${s}`);
-      }
+      appendLog(s);
+      if (log) process.stderr.write(`[${bin}] ${s}`);
+      handleOutput(s);
     });
+
+    function closeLog() {
+      if (logStream) {
+        logStream.end();
+        logStream = null;
+      }
+    }
 
     proc.on('error', (err) => {
       if (timer) clearTimeout(timer);
+      closeLog();
       reject(err);
     });
 
     proc.on('close', (code) => {
       if (timer) clearTimeout(timer);
+      closeLog();
+      const cmd = `${bin} ${args.join(' ')}`;
       if (timedOut) {
-        reject(new Error(`${bin} ${args.join(' ')} timed out after ${timeout}ms. stdout: ${stdout} stderr: ${stderr}`));
+        const tail = (stderr || stdout).slice(-4000);
+        reject(new Error(`${cmd} timed out after ${timeout}ms.\n\nLast output:\n${tail}${logToFile ? `\n\nFull log: ${logToFile}` : ''}`));
       } else if (code !== 0) {
-        reject(new Error(`${bin} ${args.join(' ')} exited with code ${code}. stdout: ${stdout} stderr: ${stderr}`));
+        const outTail = stdout.length > 2000
+          ? `... (stdout truncated; full log: ${logToFile || 'console'})\n${stdout.slice(-2000)}`
+          : stdout;
+        reject(new Error(`${cmd} exited with code ${code}.\n\nstderr:\n${stderr}\n\nstdout:\n${outTail}`));
       } else {
         resolve(stdout);
       }
@@ -308,11 +345,20 @@ async function startDockerServices() {
     throw new Error(`Failed to prepare Docker Compose file.\n\n${err.message}`);
   }
 
-  updateStatus('Starting services with Docker Compose (this may take a few minutes)...');
+  const logFile = path.join(workingRoot, 'logs', 'docker-compose.log');
+
+  updateStatus('Building Docker images (first run can take 10–30 minutes)...');
   try {
-    await runCommand('docker', ['compose', '-f', composeFile, '-p', project, 'up', '-d', '--build'], { cwd: workingRoot, timeout: COMPOSE_TIMEOUT });
+    await runCommand('docker', ['compose', '--progress=plain', '-f', composeFile, '-p', project, 'build'], { cwd: workingRoot, timeout: COMPOSE_TIMEOUT, logToFile: logFile });
   } catch (err) {
-    throw new Error(`docker compose up failed.\n\n${err.message}`);
+    throw new Error(`Docker Compose build failed.\n\n${err.message}\n\nFull build log: ${logFile}`);
+  }
+
+  updateStatus('Starting containers with Docker Compose...');
+  try {
+    await runCommand('docker', ['compose', '-f', composeFile, '-p', project, 'up', '-d'], { cwd: workingRoot, timeout: 120000, logToFile: logFile });
+  } catch (err) {
+    throw new Error(`Docker Compose up failed.\n\n${err.message}\n\nFull log: ${logFile}`);
   }
   dockerStarted = true;
 
