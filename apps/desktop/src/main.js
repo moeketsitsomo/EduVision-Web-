@@ -512,7 +512,6 @@ async function startNodeServices() {
   webProcess.stdout.on('data', (d) => process.stdout.write(`[Web] ${d.toString()}`));
   webProcess.stderr.on('data', (d) => process.stderr.write(`[Web] ${d.toString()}`));
 
-  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
   await waitForUrl(`http://127.0.0.1:${apiPort}/health`, 120000, 'API health');
   await waitForPublicSite(apiPort, schoolSlug, 120000);
   await waitForUrl(`http://127.0.0.1:${webPort}/`, 120000, 'Web server');
