@@ -604,7 +604,7 @@ function createMainWindow() {
     callback({ requestHeaders: details.requestHeaders });
   });
 
-  mainWindow.loadURL(`http://127.0.0.1:${webPort}`);
+  mainWindow.loadURL(`http://localhost:${webPort}`);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
