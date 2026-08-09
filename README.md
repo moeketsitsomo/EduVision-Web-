@@ -40,8 +40,7 @@ Use `scripts/desktop-start.bat` from a command prompt after installing Node.js a
 
 - `apps/desktop/src/main.js` starts the API (`apps/api/dist/src/main.js`) on port 4000 and the Next.js standalone server (`apps/web/.next/standalone/apps/web/server.js`) on port 3000.
 - It then opens a 1280x800 Electron window pointing at `http://localhost:3000`.
-- Admin routes (`/admin`, `/setup`, etc.) are redirected back to `/` by `apps/web/src/middleware.ts` when `DISABLE_ADMIN=true`, keeping the desktop build public-only.
-- The CMS is still part of `EduVision-Web` and is accessible through the normal web deployment at `https://yourdomain.com/admin`.
+- The admin dashboard is available at `http://localhost:3000/admin` for the desktop build and any web deployment.
 - The default school tenant is `demo-school`; set `SCHOOL_SLUG` to switch schools.
 
 ## Features

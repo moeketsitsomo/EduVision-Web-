@@ -15,6 +15,11 @@ All notable changes to the EduVision School Website + Admin Dashboard are docume
 - Product scope refocused on a professional public school website with a simple no-code admin dashboard. Full ERP/CMS modules (students, results, attendance, timetable, library, borrowings, finance, fees, subscriptions, invoices, licences and full reports) are hidden from the school admin UI.
 - Admin sidebar and dashboard now only show public-website resources: Subjects, Pages, News, Events, Staff, Galleries, Documents, Contacts, Contact Requests, Social Links, Navigation, Users and Admissions.
 - Removed `SubscriptionGuard` and `AuditInterceptor` providers so school websites are not blocked by subscription or audit state.
+- Removed `DISABLE_ADMIN` from the desktop build so the admin dashboard is available at `http://localhost:3000/admin` in packaged installers.
+
+### Fixed
+
+- `getSchoolSlug` now falls back to `DEFAULT_SCHOOL_SLUG` when the request host is an IP address (e.g. `127.0.0.1`), preventing `Failed to fetch site: 403` in packaged desktop builds.
 
 ## [1.4.2] — Docker Build Timeout and Logging
 

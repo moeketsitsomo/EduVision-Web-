@@ -71,6 +71,12 @@ The School Website Builder in `/admin/settings` allows a school administrator to
 
 All fields are saved to the `School` record and appear immediately on the public website.
 
+### Verified live update
+
+- Logged into `/admin/login` with the seeded school administrator account.
+- Changed the school name in the School Website Builder and saved.
+- Refreshed the public website; the header, hero badge, welcome section and footer all reflected the new name.
+
 ## 6. Signatures
 
 SHA-256 checksums are provided in `SHA256SUMS.txt`.

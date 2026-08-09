@@ -52,6 +52,8 @@ Administrators can type, paste, upload and save. No HTML, CSS, GitHub, terminal 
 
 - Linux `.deb` and `.AppImage`.
 - Windows `.exe` NSIS installer.
+- Admin dashboard is available at `http://localhost:3000/admin` in the desktop build.
+- Fixed `Failed to fetch site: 403` when the desktop window loaded `127.0.0.1` by resolving IP addresses to the default school slug.
 - All installers include the updated Docker Compose package and source.
 
 ## Verification
