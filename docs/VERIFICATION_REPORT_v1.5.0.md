@@ -77,6 +77,9 @@ All fields are saved to the `School` record and appear immediately on the public
 - Changed the school name in the School Website Builder and saved.
 - Refreshed the public website; the header, hero badge, welcome section and footer all reflected the new name.
 
-## 6. Signatures
+## 6. Production Package
 
-SHA-256 checksums are provided in `SHA256SUMS.txt`.
+- GitHub release: https://github.com/moeketsitsomo/EduVision-Web-/releases/tag/v1.5.0
+- SHA-256 checksums for all included files are provided in `SHA256SUMS.txt`.
+
+## 7. Signatures
