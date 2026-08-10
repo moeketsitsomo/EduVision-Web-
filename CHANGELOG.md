@@ -2,6 +2,32 @@
 
 All notable changes to the EduVision School Website + Admin Dashboard are documented in this file.
 
+## [1.5.1] — First-Run School Setup Fix
+
+### Added
+
+- Public first-run wizard at `/setup` so a clean installation prompts the school administrator to create the active school tenant without editing files or databases.
+- `POST /api/setup` creates the school, an initial `SCHOOL_ADMIN` user and optional social links from a single form submission.
+- `POST /api/setup/upload` lets the first-run wizard upload a logo, favicon or banner before any authenticated user exists.
+- `GET /api/setup/status` reports whether the first-run wizard is required.
+- `CacheService.clear()` is called after a school is updated so public website changes appear immediately.
+
+### Changed
+
+- `TenantService.resolveFromRequest` falls back to `DEFAULT_SCHOOL_SLUG` or the first active school when no explicit tenant is provided.
+- Public API middleware returns `{ setupRequired: true }` with `403` when no active school exists, instead of a generic `School tenant not found or inactive.` message.
+- `AuthService` login and password reset now resolve the active school through the tenant fallback when no slug is supplied.
+- `apps/web/src/middleware.ts` redirects public routes to `/setup` while no school exists.
+- `apps/web/src/lib/api.ts` handles `setupRequired` responses and avoids sending an empty `x-school-slug` header.
+- `apps/web/src/app/admin/login/page.tsx` no longer requires a school slug and shows a placeholder for single-school setups.
+- `apps/web/src/app/setup/page.tsx` is now a complete multi-tab “Set Up Your School” form.
+- `apps/desktop/src/main.js` already supports `setupRequired: true` and an empty `DEFAULT_SCHOOL_SLUG`.
+- `apps/api/prisma/seed.ts` is a no-op; the first-run wizard is the only way to create a school.
+
+### Fixed
+
+- `SchoolsService.update` clears the API cache so the public website reflects branding and content changes immediately.
+
 ## [1.5.0] — Public School Website + No-Code Admin Dashboard
 
 ### Added

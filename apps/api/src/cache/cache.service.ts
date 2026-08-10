@@ -16,4 +16,8 @@ export class CacheService {
   async del(key: string): Promise<boolean> {
     return this.cache.del(key);
   }
+
+  async clear(): Promise<boolean> {
+    return this.cache.clear();
+  }
 }

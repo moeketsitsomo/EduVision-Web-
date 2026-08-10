@@ -95,14 +95,27 @@ function waitForPublicSite(apiPort, schoolSlug, timeout = 120000) {
             if (res.statusCode >= 200 && res.statusCode < 300) {
               try {
                 const data = JSON.parse(body);
+                if (data.setupRequired) {
+                  resolve('setup');
+                  return;
+                }
                 if (data.school && data.school.id) {
-                  resolve();
+                  resolve('ready');
                   return;
                 }
                 lastReason = 'API did not return a valid school';
               } catch {
                 lastReason = 'Invalid JSON from API';
               }
+            } else if (res.statusCode === 403) {
+              try {
+                const data = JSON.parse(body);
+                if (data.setupRequired) {
+                  resolve('setup');
+                  return;
+                }
+              } catch {}
+              lastReason = `HTTP ${res.statusCode}: ${body.slice(0, 120)}`;
             } else {
               lastReason = `HTTP ${res.statusCode}`;
             }
@@ -138,7 +151,7 @@ function waitForUrl(url, timeout = 120000, label = url) {
   return new Promise((resolve, reject) => {
     const tryConnect = () => {
       const req = http.get(url, { timeout: 2000, family: 4 }, (res) => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
+        if (res.statusCode >= 200 && res.statusCode < 400) {
           resolve();
         } else {
           lastReason = `HTTP ${res.statusCode}`;
@@ -311,7 +324,8 @@ WEB_PORT=3000
 API_URL=http://localhost:4000
 NEXT_PUBLIC_API_URL=
 NODE_ENV=production
-DEFAULT_SCHOOL_SLUG=demo-school
+# Optional fallback slug. Leave empty for first-run setup.
+DEFAULT_SCHOOL_SLUG=
 STORAGE_TYPE=local
 STORAGE_LOCAL_ROOT=uploads
 STORAGE_BASE_URL=http://localhost:4000
@@ -371,7 +385,7 @@ async function startDockerServices() {
   ensureEnvFile(workingRoot);
 
   updateStatus('Checking for already-running services...');
-  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
+  const schoolSlug = process.env.SCHOOL_SLUG || process.env.DEFAULT_SCHOOL_SLUG || '';
   try {
     await waitForUrl('http://127.0.0.1:4000/health', 3000, 'API');
     await waitForPublicSite('4000', schoolSlug, 3000);
@@ -460,7 +474,7 @@ async function startNodeServices() {
   const installRoot = getInstallRoot();
   const apiPort = process.env.API_PORT || '4000';
   const webPort = process.env.WEB_PORT || '3000';
-  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
+  const schoolSlug = process.env.SCHOOL_SLUG || process.env.DEFAULT_SCHOOL_SLUG || '';
 
   if (app.isPackaged) {
     const apiScript = nodeServicePath('api');
@@ -520,7 +534,7 @@ async function startServices() {
   const apiPort = process.env.API_PORT || '4000';
   const webPort = process.env.WEB_PORT || '3000';
 
-  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
+  const schoolSlug = process.env.SCHOOL_SLUG || process.env.DEFAULT_SCHOOL_SLUG || '';
   try {
     await waitForUrl(`http://127.0.0.1:${apiPort}/health`, 3000, 'API');
     await waitForPublicSite(apiPort, schoolSlug, 3000);
@@ -567,7 +581,7 @@ function createSplashWindow() {
 
 function createMainWindow() {
   const webPort = process.env.WEB_PORT || '3000';
-  const schoolSlug = process.env.SCHOOL_SLUG || 'demo-school';
+  const schoolSlug = process.env.SCHOOL_SLUG || process.env.DEFAULT_SCHOOL_SLUG || '';
 
   mainWindow = new BrowserWindow({
     width: 1280,

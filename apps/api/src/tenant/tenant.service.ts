@@ -6,23 +6,30 @@ import { School } from '@prisma/client';
 export class TenantService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async resolveFromRequest(req: any): Promise<School | null> {
+  async resolveFromRequest(req: any, fallback = false): Promise<School | null> {
     const slug =
       req.headers['x-school-slug'] ||
       req.headers['x-tenant-slug'] ||
       req.query?.schoolSlug;
     if (slug && typeof slug === 'string') {
-      return this.resolveBySlug(slug);
+      const bySlug = await this.resolveBySlug(slug);
+      if (bySlug) return bySlug;
     }
 
     const schoolId = req.headers['x-school-id'];
     if (schoolId && typeof schoolId === 'string') {
-      return this.prisma.school.findUnique({ where: { id: schoolId } });
+      const byId = await this.prisma.school.findUnique({ where: { id: schoolId } });
+      if (byId) return byId;
     }
 
     const host = req.headers['host'] || req.hostname;
     if (host && typeof host === 'string') {
-      return this.resolveByHost(host);
+      const byHost = await this.resolveByHost(host);
+      if (byHost) return byHost;
+    }
+
+    if (fallback) {
+      return this.resolveDefaultSchool();
     }
 
     return null;
@@ -46,5 +53,23 @@ export class TenantService {
     }
 
     return null;
+  }
+
+  async countActiveSchools(): Promise<number> {
+    return this.prisma.school.count({ where: { isActive: true } });
+  }
+
+  async resolveDefaultSchool(): Promise<School | null> {
+    const fallbackSlug = process.env.DEFAULT_SCHOOL_SLUG;
+    if (fallbackSlug) {
+      const bySlug = await this.resolveBySlug(fallbackSlug);
+      if (bySlug?.isActive) return bySlug;
+    }
+
+    const active = await this.prisma.school.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    return active || null;
   }
 }

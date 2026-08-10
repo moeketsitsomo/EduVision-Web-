@@ -79,8 +79,12 @@ async function bootstrap() {
 
   const tenantService = app.get(TenantService);
   app.use('/public', async (req, res, next) => {
-    const tenant = await tenantService.resolveFromRequest(req);
+    const tenant = await tenantService.resolveFromRequest(req, true);
     if (!tenant || !tenant.isActive) {
+      const activeCount = await tenantService.countActiveSchools();
+      if (activeCount === 0) {
+        return res.status(403).json({ setupRequired: true, message: 'No school has been configured. Complete first-run setup.' });
+      }
       return res.status(403).json({ message: 'School tenant not found or inactive.' });
     }
     const blocked = ['SUSPENDED', 'CANCELLED', 'EXPIRED'];

@@ -1,10 +1,14 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CacheService } from '../cache/cache.service';
 import { Prisma, School, SubscriptionStatus, PlanType } from '@prisma/client';
 
 @Injectable()
 export class SchoolsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cache: CacheService,
+  ) {}
 
   async findAll() {
     return this.prisma.school.findMany({
@@ -67,7 +71,9 @@ export class SchoolsService {
     if (data.slug) {
       data.slug = (data.slug as string).toLowerCase();
     }
-    return this.prisma.school.update({ where: { id }, data });
+    const school = await this.prisma.school.update({ where: { id }, data });
+    await this.cache.clear().catch(() => undefined);
+    return school;
   }
 
   async setActive(id: string, active: boolean): Promise<School> {

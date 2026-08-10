@@ -3,7 +3,7 @@ function isIpAddress(host: string): boolean {
 }
 
 export function getSchoolSlug(host?: string | null): string {
-  const fallback = process.env.DEFAULT_SCHOOL_SLUG || 'demo-school';
+  const fallback = process.env.DEFAULT_SCHOOL_SLUG || '';
   if (!host) return fallback;
 
   const h = host.split(':')[0].toLowerCase();
