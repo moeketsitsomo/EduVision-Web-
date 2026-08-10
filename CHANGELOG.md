@@ -1,6 +1,51 @@
 # Changelog
 
-All notable changes to the EduVision School Website Platform are documented in this file.
+All notable changes to the EduVision School Website + Admin Dashboard are documented in this file.
+
+## [1.5.1] — First-Run School Setup Fix
+
+### Added
+
+- Public first-run wizard at `/setup` so a clean installation prompts the school administrator to create the active school tenant without editing files or databases.
+- `POST /api/setup` creates the school, an initial `SCHOOL_ADMIN` user and optional social links from a single form submission.
+- `POST /api/setup/upload` lets the first-run wizard upload a logo, favicon or banner before any authenticated user exists.
+- `GET /api/setup/status` reports whether the first-run wizard is required.
+- `CacheService.clear()` is called after a school is updated so public website changes appear immediately.
+
+### Changed
+
+- `TenantService.resolveFromRequest` falls back to `DEFAULT_SCHOOL_SLUG` or the first active school when no explicit tenant is provided.
+- Public API middleware returns `{ setupRequired: true }` with `403` when no active school exists, instead of a generic `School tenant not found or inactive.` message.
+- `AuthService` login and password reset now resolve the active school through the tenant fallback when no slug is supplied.
+- `apps/web/src/middleware.ts` redirects public routes to `/setup` while no school exists.
+- `apps/web/src/lib/api.ts` handles `setupRequired` responses and avoids sending an empty `x-school-slug` header.
+- `apps/web/src/app/admin/login/page.tsx` no longer requires a school slug and shows a placeholder for single-school setups.
+- `apps/web/src/app/setup/page.tsx` is now a complete multi-tab “Set Up Your School” form.
+- `apps/desktop/src/main.js` already supports `setupRequired: true` and an empty `DEFAULT_SCHOOL_SLUG`.
+- `apps/api/prisma/seed.ts` is a no-op; the first-run wizard is the only way to create a school.
+
+### Fixed
+
+- `SchoolsService.update` clears the API cache so the public website reflects branding and content changes immediately.
+
+## [1.5.0] — Public School Website + No-Code Admin Dashboard
+
+### Added
+
+- New `School` content fields for homepage hero, welcome message, academics, admissions, departments, policies and Open Graph image.
+- No-code School Website Builder in `/admin/settings` with sections for branding, logo/favicon/banner, home page, about, academics, admissions, contact, statistics, facilities/departments/awards and policies.
+- Public pages now read `heroTitle`, `heroDescription`, `heroCtaText`, `heroCtaLink`, `welcomeTitle`, `welcomeMessage`, `academicsInfo`, `curriculumInfo`, `timetableInfo`, `admissionInfo`, `admissionRequirements`, `admissionDocuments`, `admissionImportantDates`, `admissionFeeInfo`, `departments`, `policiesInfo` and `ogImageUrl` directly from the `School` record.
+
+### Changed
+
+- Product scope refocused on a professional public school website with a simple no-code admin dashboard. Full ERP/CMS modules (students, results, attendance, timetable, library, borrowings, finance, fees, subscriptions, invoices, licences and full reports) are hidden from the school admin UI.
+- Admin sidebar and dashboard now only show public-website resources: Subjects, Pages, News, Events, Staff, Galleries, Documents, Contacts, Contact Requests, Social Links, Navigation, Users and Admissions.
+- Removed `SubscriptionGuard` and `AuditInterceptor` providers so school websites are not blocked by subscription or audit state.
+- Removed `DISABLE_ADMIN` from the desktop build so the admin dashboard is available at `http://localhost:3000/admin` in packaged installers.
+
+### Fixed
+
+- `getSchoolSlug` now falls back to `DEFAULT_SCHOOL_SLUG` when the request host is an IP address (e.g. `127.0.0.1`), preventing `Failed to fetch site: 403` in packaged desktop builds.
 
 ## [1.4.2] — Docker Build Timeout and Logging
 

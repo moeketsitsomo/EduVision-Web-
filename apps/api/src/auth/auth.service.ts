@@ -45,7 +45,7 @@ export class AuthService {
       tenant = await this.tenantService.resolveBySlug(dto.schoolSlug);
     }
     if (!tenant) {
-      tenant = await this.tenantService.resolveFromRequest(req);
+      tenant = await this.tenantService.resolveFromRequest(req, true);
     }
     if (!tenant) {
       throw new BadRequestException('School tenant not found. Provide a valid schoolSlug or use a school subdomain.');
@@ -109,7 +109,7 @@ export class AuthService {
       tenant = await this.tenantService.resolveBySlug(dto.schoolSlug);
     }
     if (!tenant) {
-      tenant = await this.tenantService.resolveFromRequest(req);
+      tenant = await this.tenantService.resolveFromRequest(req, true);
     }
     if (!tenant) {
       throw new BadRequestException('School tenant not found.');

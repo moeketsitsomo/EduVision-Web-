@@ -24,7 +24,8 @@ export default async function AboutPage() {
   const awards = Array.isArray(school.awards) ? school.awards.filter((a) => a) : [];
   const publishedStaff = staff.filter((s) => s.isPublished).sort((a, b) => a.order - b.order);
   const management = publishedStaff.filter((s) => s.role.toLowerCase().includes('principal') || s.role.toLowerCase().includes('deputy') || s.role.toLowerCase().includes('head'));
-  const departments = Array.from(new Set(publishedStaff.map((s) => s.department || 'General').filter(Boolean)));
+  const configuredDepartments = Array.isArray(school.departments) ? school.departments.map((d: any) => (typeof d === 'string' ? d : d.name || 'General')) : [];
+  const departments = Array.from(new Set([...configuredDepartments, ...publishedStaff.map((s) => s.department || 'General').filter(Boolean)]));
   const policies = downloads?.filter((d) => d.category === 'policy' || d.title.toLowerCase().includes('policy')) || [];
   const prospectus = downloads?.find((d) => d.title.toLowerCase().includes('prospectus'));
 
@@ -201,7 +202,7 @@ export default async function AboutPage() {
             <CardContent className="p-8">
               <FileText className="size-10 text-[var(--school-primary)] mb-4" />
               <h3 className="text-2xl font-bold mb-2">School Policies</h3>
-              <p className="text-muted-foreground mb-6">Access our admissions, behaviour, uniform and safety policies.</p>
+              <p className="text-muted-foreground mb-6">{school.policiesInfo || 'Access our admissions, behaviour, uniform and safety policies.'}</p>
               {policies.length > 0 ? (
                 <ul className="space-y-2 mb-6">
                   {policies.slice(0, 4).map((p) => (

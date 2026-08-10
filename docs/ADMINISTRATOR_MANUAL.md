@@ -204,7 +204,7 @@ Schools cannot see each other's data.
 - Use HTTPS in production.
 - Keep `.env` secrets safe and out of version control.
 - The public website cannot access `/admin` without authentication.
-- Desktop public builds can set `DISABLE_ADMIN=true` to hide the CMS entirely.
+- The admin dashboard is included in the desktop build at `http://localhost:3000/admin`.
 
 ---
 

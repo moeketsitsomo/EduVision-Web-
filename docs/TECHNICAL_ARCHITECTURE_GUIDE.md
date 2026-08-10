@@ -52,7 +52,7 @@ EduVision-Web
 | Data fetch | `fetchSite()` + public endpoints | `apiFetch()` + authenticated endpoints |
 | Multi-tenancy | Resolved by `Host`, `x-school-slug` or `?schoolSlug` | Same tenant resolution plus JWT role check |
 
-The desktop public build can set `DISABLE_ADMIN=true` to redirect `/admin` and `/setup` to `/`.
+The desktop build makes the admin dashboard available at `http://localhost:3000/admin`; authentication is enforced by the API.
 
 ---
 
@@ -144,7 +144,7 @@ Migrations are in `apps/api/prisma/migrations/` and applied with `prisma migrate
 - Starts PostgreSQL, Redis, API and web via `docker-compose.desktop.yml` if services are not running.
 - Injects `x-school-slug` header for every request.
 - Loads `http://localhost:3000` in an Electron window.
-- Disables `/admin` when `DISABLE_ADMIN=true`.
+- The admin dashboard is available at `http://localhost:3000/admin` for local management.
 
 Installers are built with `electron-builder`:
 - Ubuntu `.deb`

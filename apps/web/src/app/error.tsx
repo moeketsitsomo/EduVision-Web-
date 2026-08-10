@@ -18,7 +18,8 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <h1 className="text-2xl font-bold">Something went wrong</h1>
         <p className="text-muted-foreground">{error.message || 'We could not load this page. Please try again or contact support.'}</p>
         <div className="flex justify-center gap-3">
-          <Button onClick={reset}><RefreshCcw className="size-4 mr-2" /> Try again</Button>
+          <Button onClick={() => { try { reset(); } catch { window.location.reload(); } }}><RefreshCcw className="size-4 mr-2" /> Try again</Button>
+          <Button variant="outline" onClick={() => window.location.reload()}>Reload page</Button>
         </div>
       </div>
     </div>

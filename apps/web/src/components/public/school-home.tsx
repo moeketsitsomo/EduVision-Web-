@@ -8,7 +8,7 @@ import { Newspaper, GraduationCap, ChevronRight, Megaphone, Users, BookOpen, Sch
 import { StatCard } from './stat-card';
 
 const CORE_NAV_SLUGS = new Set([
-  'home', 'about', 'academics', 'admissions', 'news', 'events', 'gallery', 'contact', 'portal',
+  'home', 'about', 'academics', 'admissions', 'news', 'events', 'gallery', 'contact',
 ]);
 
 export async function SchoolHome() {
@@ -52,14 +52,14 @@ export async function SchoolHome() {
               <School className="size-4" /> Welcome to {school.name}
             </p>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">
-              {school.websiteTitle || school.name}
+              {school.heroTitle || school.websiteTitle || school.name}
             </h1>
             <p className="mt-6 text-lg md:text-2xl opacity-95 max-w-2xl leading-relaxed">
-              {school.metaDescription}
+              {school.heroDescription || school.metaDescription}
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Button asChild size="lg" className="bg-white text-[var(--school-primary)] hover:bg-gray-100 shadow-lg">
-                <Link href="/admissions">Apply Now <ArrowRight className="size-4 ml-2" /></Link>
+                <Link href={school.heroCtaLink || '/admissions'}>{school.heroCtaText || 'Apply Now'} <ArrowRight className="size-4 ml-2" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white bg-transparent text-white hover:bg-white/15">
                 <Link href="/about">Discover Our School</Link>
@@ -84,8 +84,10 @@ export async function SchoolHome() {
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div className="animate-fade-in-up">
               <p className="text-sm font-semibold text-[var(--school-primary)] uppercase tracking-wide mb-2">About Us</p>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Welcome to {school.name}</h2>
-              {homePage ? (
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">{school.welcomeTitle || `Welcome to ${school.name}`}</h2>
+              {school.welcomeMessage ? (
+                <p className="text-muted-foreground leading-relaxed text-lg">{school.welcomeMessage}</p>
+              ) : homePage ? (
                 <div className="prose max-w-none text-muted-foreground leading-relaxed">
                   <MarkdownRenderer content={homePage.content.replace(/^#\s.*$/m, '').trim() || homePage.content} />
                 </div>

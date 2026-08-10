@@ -1,19 +1,21 @@
 # EduVision School Website — School Setup Guide
 
-This guide walks a new school through initial setup from a fresh EduVision installation.
+Version 1.5.0
+
+This guide walks a school administrator through setting up and managing a professional public school website with no coding.
 
 ---
 
 ## 1. Choose how to run EduVision
 
-### Option A: Docker (recommended for schools with an Ubuntu server)
-- Install Docker and Docker Compose.
+### Option A: Server deployment (recommended for public access)
+- Install Docker and Docker Compose on Ubuntu 22.04/24.04.
 - Copy `.env.example` to `.env` and edit.
 - Run `./scripts/deploy.sh`.
 - Nginx with SSL is configured automatically.
 
-### Option B: Desktop application (Windows / Ubuntu)
-- Download `EduVision-School-Website-v1.4.2-Production.zip`.
+### Option B: Desktop application (Ubuntu / Windows)
+- Download `EduVision-School-Website-v1.5.0-Production.zip`.
 - Install the `.deb`, `.AppImage` or `.exe`.
 - Launch **EduVision School Website** from the applications menu or desktop.
 - The app auto-starts PostgreSQL, Redis, API and web services via Docker.
@@ -45,9 +47,8 @@ STORAGE_LOCAL_ROOT=uploads
 
 # JWT (generate long random strings)
 JWT_SECRET=change-me-to-a-long-random-string
-TOTP_SECRET=change-me-to-a-32-char-secret-for-2fa
 
-# Email (for password reset and notifications)
+# Email (for password reset)
 EMAIL_HOST=smtp.yourprovider.com
 EMAIL_PORT=587
 EMAIL_USER=...
@@ -85,8 +86,6 @@ If the database is empty, open `https://yourdomain.com/setup` and create:
    - `name` — school name.
    - `slug` — unique URL slug.
    - `isActive` — true.
-   - `subscriptionStatus` — ACTIVE.
-   - `plan` — BASIC, STANDARD or ENTERPRISE.
 5. Save.
 
 The school is now reachable by `https://<slug>.yourdomain.com` or `https://yourdomain.com?schoolSlug=<slug>`.
@@ -95,7 +94,7 @@ The school is now reachable by `https://<slug>.yourdomain.com` or `https://yourd
 
 ## 5. Add a school admin
 
-1. Go to **CMS > Users** while logged in as super admin and viewing the new school.
+1. Go to **Users** while logged in as super admin and viewing the new school.
 2. Create a user with:
    - `email`: admin@yourschool.edu
    - `role`: SCHOOL_ADMIN
@@ -105,40 +104,35 @@ The school is now reachable by `https://<slug>.yourdomain.com` or `https://yourd
 
 ---
 
-## 6. Configure school branding
+## 6. Build your public website with the School Website Builder
 
 1. Log in as school admin.
-2. Go to **CMS > Settings**.
-3. Set:
-   - `websiteTitle`
-   - `primaryColor` and `secondaryColor`
-   - `logoUrl` and `bannerImageUrl`
-   - `footerText`
-   - `principalName` and `principalMessage`
-   - `mission`, `vision`, `values`
-   - `history`, `enrollmentCount`, `teacherCount`, `classroomCount`, `passRate`
-   - `facilities` (one per line) and `awards` (year and title)
-   - `contactPhone`, `contactEmail`, `admissionsPhone`, `admissionsEmail`
-   - `address`, `officeHours`, `googleMapsUrl`
-4. Save and refresh the public website.
+2. Go to **Settings** in the admin sidebar.
+3. Use the no-code School Website Builder to update:
+   - **Branding:** school name, website title, primary/secondary colours, logo, favicon, banner, Open Graph image, footer text.
+   - **Home Page:** hero title and description, hero button text and link, welcome title and message, principal name and message.
+   - **About:** established year, history, mission, vision and values.
+   - **Academics:** overview, curriculum highlights (one per line), timetable information.
+   - **Admissions:** overview, requirements (one per line), required documents, important dates, fee information.
+   - **Contact:** general and admissions email/phone, address, office hours, Google Maps embed URL.
+   - **Statistics:** learners, teachers, classrooms and pass rate.
+   - **Facilities, Departments & Awards:** lists (one per line) and awards (title with optional year in brackets).
+   - **Policies:** policies overview text.
+4. Save. Every change appears immediately on the public website.
 
 ---
 
 ## 7. Add public pages
 
-1. Go to **CMS > Pages**.
-2. Create or edit:
+1. Go to **Pages**.
+2. Create or edit pages such as:
    - About Us
-   - School History
    - Academics
    - Admissions
    - School Fees
    - School Uniform
    - Sports
    - Contact Us
-   - News
-   - Events
-   - Gallery
 3. Use `menuOrder` to control menu position.
 4. Toggle `showInMenu` to hide internal pages.
 
@@ -146,17 +140,17 @@ The school is now reachable by `https://<slug>.yourdomain.com` or `https://yourd
 
 ## 8. Upload media and documents
 
-1. Go to **CMS > Media Library**.
+1. Go to **Media Library**.
 2. Upload the school logo, banner, staff photos and event images.
 3. Assign categories such as `Leadership`, `Sports`, `2026 Events`.
-4. For policies and prospectus, go to **CMS > Downloads** and upload documents.
-5. Use the public URLs in Settings, Pages and Posts.
+4. For policies and prospectus, go to **Documents** and upload PDFs.
+5. Copy the generated URLs and paste them into Settings, Pages, Posts or Staff records.
 
 ---
 
 ## 9. Add staff and leadership
 
-1. Go to **CMS > Staff**.
+1. Go to **Staff**.
 2. Add each staff member:
    - Name, role, department, email.
    - Photo URL from the Media Library.
@@ -168,26 +162,25 @@ The school is now reachable by `https://<slug>.yourdomain.com` or `https://yourd
 
 ## 10. Configure news, events and galleries
 
-- **News:** write articles under **CMS > News**.
-- **Events:** add calendar events under **CMS > Events**.
+- **News:** write articles under **News**.
+- **Events:** add calendar events under **Events**.
 - **Galleries:** create albums and ensure the public Gallery page renders them.
 
 ---
 
 ## 11. Set up admissions
 
-1. Edit the public **Admissions** page with your requirements and fees.
+1. Edit the admissions information in **Settings > Admissions**.
 2. The `/admissions` page contains the online application form.
-3. Submissions are managed in **CMS > Admissions Management**.
+3. Submissions are managed in **Admissions**.
 
 ---
 
-## 12. Parent/Learner Portal
+## 12. Configure navigation and social links
 
-1. Create parents and learners under **CMS > Users**.
-2. For parents, set `role = PARENT` and link to the learner via `studentId` if needed.
-3. For learners, set `role = LEARNER` and `studentNumber`.
-4. Parents log in at `/portal/login` to view notices, calendar, attendance, homework and reports.
+- **Navigation:** add or reorder public menu items.
+- **Social Links:** add Facebook, Instagram, YouTube, X and other social media links. They appear in the footer.
+- **Contact Directory:** add general, admissions and emergency contact numbers.
 
 ---
 
@@ -204,7 +197,19 @@ The school is now reachable by `https://<slug>.yourdomain.com` or `https://yourd
 
 ---
 
-## 14. Backups
+## 14. Multi-school isolation
+
+Each school has its own:
+- Branding, colours, logo and banner.
+- Content, pages, posts, events, gallery and staff.
+- Contact details and social links.
+- Users and settings.
+
+A school administrator can only edit the school they belong to.
+
+---
+
+## 15. Backups
 
 Run `./scripts/backup.sh` daily. It creates:
 - PostgreSQL dump.
@@ -215,8 +220,7 @@ Store backups off-site.
 
 ---
 
-## 15. Next steps
+## 16. Next steps
 
 - Review the **Administrator Manual** for daily tasks.
-- Share the **Parent User Guide** and **Teacher User Guide** with users.
 - Read the **Technical Architecture Guide** for deployment details.

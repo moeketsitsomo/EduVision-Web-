@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [totpCode, setTotpCode] = useState('');
-  const [schoolSlug, setSchoolSlug] = useState('demo-school');
+  const [schoolSlug, setSchoolSlug] = useState('');
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -112,7 +112,7 @@ export default function AdminLoginPage() {
                   id="schoolSlug"
                   value={schoolSlug}
                   onChange={(e) => setSchoolSlug(e.target.value)}
-                  required
+                  placeholder="Leave blank for single-school setup"
                 />
               </div>
               <div className="space-y-2">

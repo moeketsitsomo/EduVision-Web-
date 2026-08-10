@@ -8,6 +8,20 @@ import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Calendar, Clock, GraduationCap, CheckCircle2 } from 'lucide-react';
+import type { School } from '@/lib/types';
+
+function InfoList({ items }: { items: any[] }) {
+  return (
+    <ul className="space-y-2 text-sm text-muted-foreground">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" />
+          {typeof item === 'string' ? item : item.name || item.title || JSON.stringify(item)}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   return schoolMetadata('Academics', 'Explore our subjects, curriculum, timetable and academic calendar.');
@@ -28,10 +42,11 @@ export default async function AcademicsPage() {
       <PageHeader title="Academics" subtitle="Curriculum, subjects, timetables and examination information." />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 space-y-20">
-        {page && (
+        {(page || school.academicsInfo) && (
           <section className="max-w-3xl mx-auto text-center">
             <div className="prose max-w-none text-muted-foreground leading-relaxed">
-              <MarkdownRenderer content={page.content} />
+              {page && <MarkdownRenderer content={page.content} />}
+              {school.academicsInfo && !page && <MarkdownRenderer content={school.academicsInfo} />}
             </div>
           </section>
         )}
@@ -83,13 +98,19 @@ export default async function AcademicsPage() {
                 <CardTitle className="flex items-center gap-2 text-xl"><GraduationCap className="size-6 text-[var(--school-primary)]" /> Curriculum</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed">Our school follows the national curriculum with a strong emphasis on literacy, numeracy, science, technology, creative arts and physical education.</p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> CAPS-aligned programmes</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Continuous assessment</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Formal examinations</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Extra classes and remediation</li>
-                </ul>
+                {school.curriculumInfo && Array.isArray(school.curriculumInfo) ? (
+                  <InfoList items={school.curriculumInfo} />
+                ) : (
+                  <>
+                    <p className="text-muted-foreground leading-relaxed">Our school follows the national curriculum with a strong emphasis on literacy, numeracy, science, technology, creative arts and physical education.</p>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> CAPS-aligned programmes</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Continuous assessment</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Formal examinations</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Extra classes and remediation</li>
+                    </ul>
+                  </>
+                )}
               </CardContent>
             </Card>
             <Card className="bg-background hover:shadow-lg transition-all hover:-translate-y-1">
@@ -97,13 +118,19 @@ export default async function AcademicsPage() {
                 <CardTitle className="flex items-center gap-2 text-xl"><Clock className="size-6 text-[var(--school-primary)]" /> Timetable</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed">The school day runs from 07:30 to 14:30. Each class has a structured timetable covering all subjects, with breaks for sport, culture and lunch.</p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Morning assembly</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Core subject blocks</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Sport and culture periods</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Aftercare until 17:00</li>
-                </ul>
+                {school.timetableInfo ? (
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{school.timetableInfo}</p>
+                ) : (
+                  <>
+                    <p className="text-muted-foreground leading-relaxed">The school day runs from 07:30 to 14:30. Each class has a structured timetable covering all subjects, with breaks for sport, culture and lunch.</p>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Morning assembly</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Core subject blocks</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Sport and culture periods</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="size-4 text-[var(--school-primary)] mt-0.5" /> Aftercare until 17:00</li>
+                    </ul>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

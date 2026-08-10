@@ -9,34 +9,23 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { ThemeToggle } from '@/components/theme-toggle';
 import { getToken } from '@/lib/admin-api';
 import { RESOURCES } from './resource-config';
-import { LogOut, Menu, LayoutDashboard, Shield, type LucideIcon } from 'lucide-react';
+import { LogOut, Menu, LayoutDashboard, Shield, Activity, type LucideIcon } from 'lucide-react';
 import {
   FileText,
   Newspaper,
   CalendarDays,
-  Calendar,
   Users,
   UserCog,
   Image,
   Download,
-  DollarSign,
   Phone,
   Share2,
   Compass,
   Images,
   Settings,
-  Megaphone,
   ClipboardList,
-  Award,
-  Clock,
-  CreditCard,
-  Key,
-  FileSpreadsheet,
-  Activity,
   BookOpen,
-  Receipt,
   MessageSquare,
-  BarChart3,
   Mail,
 } from 'lucide-react';
 
@@ -48,26 +37,12 @@ const RESOURCE_ICONS: Record<string, LucideIcon> = {
   staff: Users,
   galleries: Image,
   downloads: Download,
-  fees: DollarSign,
   contacts: Phone,
   'contact-messages': Mail,
   socials: Share2,
   navigation: Compass,
   users: UserCog,
-  students: Users,
-  notices: Megaphone,
   admissions: ClipboardList,
-  results: Award,
-  attendance: Clock,
-  timetable: Calendar,
-  library: BookOpen,
-  borrowings: BookOpen,
-  finance: Receipt,
-  communication: MessageSquare,
-  reports: BarChart3,
-  subscriptions: CreditCard,
-  invoices: FileSpreadsheet,
-  licenses: Key,
 };
 
 interface NavItem {

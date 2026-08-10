@@ -1,6 +1,6 @@
-# EduVision School Website Platform — Installation Guide
+# EduVision School Website + Admin Dashboard — Installation Guide
 
-Version 1.2.0
+Version 1.5.0
 
 ## 1. Requirements
 
@@ -108,17 +108,42 @@ For a native Ubuntu installation:
 8. Configure Nginx as a reverse proxy using `nginx/default.conf` as a template.
 9. Run `certbot` for SSL.
 
-## 10. Verification
+## 10. Desktop Installation
+
+A desktop application is also available for schools that want to run the public website on a local machine.
+
+### Ubuntu (.deb)
+
+```bash
+sudo dpkg -i eduvision-desktop_1.5.0_amd64.deb
+sudo apt-get install -f -y
+eduvision-desktop
+```
+
+### Ubuntu (AppImage)
+
+```bash
+chmod +x EduVision-School-Website-1.5.0.AppImage
+./EduVision-School-Website-1.5.0.AppImage --appimage-extract-and-run
+```
+
+### Windows (.exe)
+
+Run `EduVision-School-Website-Setup-1.5.0.exe` and follow the installer prompts.
+
+The desktop app automatically installs Docker (if needed), pulls/builds the required images, starts PostgreSQL, Redis, the API and the web server, then opens the school website.
+
+## 11. Verification
 
 After installation verify:
 
 - `https://yourdomain/api/health` returns `{"status":"ok"}`
-- The marketing site loads at the root domain.
-- A school subdomain resolves and shows the correct school.
-- Admin login works.
+- The public school website loads at the root domain.
+- A school subdomain resolves and shows the correct school branding.
+- `/admin/login` works and the School Website Builder saves changes that appear immediately on the public site.
 - File uploads and downloads work over HTTPS.
 
-## 11. Support
+## 12. Support
 
 For issues, review the logs:
 
